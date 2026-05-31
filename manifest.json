@@ -1,0 +1,26 @@
+{
+  "name": "木製ラビリンス迷宮バランスゲーム",
+  "short_name": "ラビリンス",
+  "description": "BRIOラビリンス風バランスゲーム。40ステージ。",
+  "start_url": "./labyrinth_balance_game_app.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#d4b06a",
+  "theme_color": "#5c2e0e",
+  "lang": "ja",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
