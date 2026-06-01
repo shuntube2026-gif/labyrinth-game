@@ -1,7 +1,7 @@
 # 木製ラビリンス迷宮バランスゲーム — 開発引き継ぎドキュメント
 
-> このファイルと `labyrinth_balance_game_app.html` をセットで別PCに移せば、
-> どのCoworkセッションでも開発を継続できます。
+> このファイルと `index.html` をセットでClone/コピーすれば、
+> どのセッションでも開発を継続できます。
 
 ---
 
@@ -9,10 +9,12 @@
 
 | 項目 | 内容 |
 |------|------|
-| ファイル | `labyrinth_balance_game_app.html` (単一ファイル・約130KB) |
+| メインファイル | `index.html` (単一ファイル・約280KB) |
 | 技術スタック | HTML5 Canvas 2D / 純粋JavaScript / CSSのみ（外部ライブラリ・CDN完全なし） |
 | 動作環境 | Chrome / Safari / Edge でダブルクリックするだけ。オフライン完全動作 |
 | 操作方法 | マウスドラッグ or タッチ（傾き操作）/ キーボード矢印キー・WASD / スマホジャイロ |
+| PWA対応 | `manifest.json` / `sw.js` / `icons/` によりホーム画面インストール・オフライン起動が可能 |
+| リポジトリ | GitHub 管理（`index.html`, `manifest.json`, `sw.js`, `icons/`, `sw.js`） |
 
 **ゲーム内容：** 木製の迷宮盤をマウスで傾け、大理石ビー玉をスタートからゴールへ導く。穴に落ちたらリスタート。クリアタイムで☆1〜3を獲得。全33ステージ。
 
@@ -482,24 +484,141 @@ function updateRollSound(spd) {
 
 ## 11. 別デバイスでの開発継続手順
 
-1. このファイル (`labyrinth_context.md`) と `labyrinth_balance_game_app.html` を同じフォルダに置く
-2. Coworkを起動し、そのフォルダを選択して開く
+1. GitHub からリポジトリを `git clone` するか、ZIP ダウンロードして展開する
+2. Claude Code を起動し、そのフォルダを開く
 3. 新しいチャットで **このドキュメントをアップロード** してから以下を伝える：
 
 ```
 木製ラビリンスバランスゲームの開発を続けたいです。
 添付のlabyrinth_context.mdが引き継ぎドキュメントです。
-labyrinth_balance_game_app.htmlが現在のゲームファイル（Stage 33まで実装済み）です。
+index.htmlが現在のゲームファイル（Stage 33まで実装済み・PWA対応済み）です。
 内容を把握した上で、[やりたいこと] をお願いします。
 ```
 
 4. あとは普通に修正をお願いするだけでOK。
 
-> **遊ぶだけなら** `labyrinth_balance_game_app.html` をブラウザでダブルクリックするだけ。
+> **遊ぶだけなら** `index.html` をブラウザでダブルクリックするだけ。
+> **スマホでホーム画面に追加するなら** GitHub Pages 等で HTTPS 公開後、ブラウザの「ホーム画面に追加」を使う。
 
 ---
 
-## 12. 今後のアイデア（未実装）
+## 12. PWA 設定（2026-05-28 追加）
+
+### プロジェクトファイル構成
+
+```
+labyrinth-game/
+├── index.html          # メインゲームファイル（HTML+CSS+JS 全込み）
+├── manifest.json       # PWA マニフェスト
+├── sw.js               # Service Worker（オフラインキャッシュ）
+├── icons/
+│   ├── icon-192.png    # PWA アイコン 192×192（木材背景＋迷路柄）
+│   └── icon-512.png    # PWA アイコン 512×512（同上）
+└── labyrinth_context*.md  # 本ドキュメント
+```
+
+### manifest.json 主要設定
+
+```json
+{
+  "name": "木製ラビリンス迷宮バランスゲーム",
+  "short_name": "ラビリンス",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#d4b06a",
+  "theme_color": "#5c2e0e"
+}
+```
+
+### index.html の PWA 関連 head タグ（確認済み）
+
+```html
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#5c2e0e">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ラビリンス">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+```
+
+### sw.js キャッシュ対象
+
+```javascript
+const CACHE = 'labyrinth-v2';
+const FILES = [
+  './',
+  './index.html',
+  './manifest.json',
+  './icons/icon-192.png',
+  './icons/icon-512.png',
+];
+```
+
+### アイコン再生成方法（Python 標準ライブラリのみ）
+
+icons/ フォルダを削除してしまった場合は以下のスクリプトで再生成可能：
+
+```bash
+cd <リポジトリルート>
+python3 - << 'EOF'
+import struct, zlib, os
+
+def make_png(w, h, pixels):
+    def chunk(t, d):
+        c = t + d
+        return struct.pack('>I', len(d)) + c + struct.pack('>I', zlib.crc32(c) & 0xffffffff)
+    raw = b''.join(b'\x00' + bytes([v for px in row for v in px]) for row in pixels)
+    return (b'\x89PNG\r\n\x1a\n'
+            + chunk(b'IHDR', struct.pack('>IIBBBBB', w, h, 8, 2, 0, 0, 0))
+            + chunk(b'IDAT', zlib.compress(raw, 9))
+            + chunk(b'IEND', b''))
+
+def draw_icon(size):
+    BG=(212,176,106); FRAME=(92,46,14); WALL=(140,90,35)
+    BALL=(225,225,235); SHINE=(255,255,255); GOAL=(34,160,34)
+    px = [[BG]*size for _ in range(size)]
+    def rect(x1,y1,x2,y2,c):
+        for y in range(max(0,y1),min(size,y2)):
+            for x in range(max(0,x1),min(size,x2)): px[y][x]=c
+    def circle(cx,cy,r,c,ic=None,ir=0):
+        for y in range(max(0,cy-r),min(size,cy+r+1)):
+            for x in range(max(0,cx-r),min(size,cx+r+1)):
+                d2=(x-cx)**2+(y-cy)**2
+                if d2<=r*r: px[y][x]=(ic if ic and d2<=ir*ir else c)
+    s=size; b=max(6,s*6//100); wt=max(3,s*4//100); m=max(10,s*16//100)
+    rect(0,0,s,b,FRAME); rect(0,s-b,s,s,FRAME)
+    rect(0,0,b,s,FRAME); rect(s-b,0,s,s,FRAME)
+    rect(b+m,s//2-wt//2,s//2+m,s//2+wt//2+1,WALL)
+    rect(s//2+m-wt//2,b+m,s//2+m+wt//2+1,s//2+m,WALL)
+    rect(s//2-m,s//2+m-wt//2,s-b-m,s//2+m+wt//2+1,WALL)
+    rect(s//2-m-wt//2,s//2-m,s//2-m+wt//2+1,s-b-m,WALL)
+    br=max(5,s*8//100); bx=b+m+br+max(2,s//40); by=b+m+br+max(2,s//40)
+    circle(bx,by,br,BALL,SHINE,max(1,br//3))
+    gr=max(5,s*9//100); gx=s-b-m-gr-max(2,s//40); gy=s-b-m-gr-max(2,s//40)
+    circle(gx,gy,gr,GOAL); circle(gx-gr//4,gy-gr//4,max(1,gr//4),(180,220,180))
+    return px
+
+os.makedirs('icons', exist_ok=True)
+for size in [192, 512]:
+    with open(f'icons/icon-{size}.png', 'wb') as f:
+        f.write(make_png(size, size, draw_icon(size)))
+    print(f'Created icons/icon-{size}.png')
+EOF
+```
+
+### PWA インストール要件チェックリスト
+
+- [ ] HTTPS でホスティングされている（GitHub Pages / Vercel / Netlify 等）
+- [x] `manifest.json` が正しく読み込まれている
+- [x] Service Worker (`sw.js`) が登録されている
+- [x] 192×192 以上の PNG アイコンが存在する
+- [x] `start_url` がアクセス可能なパスになっている
+
+---
+
+## 13. 今後のアイデア（未実装）
 
 - [ ] **Stage 34〜**: さらに高難易度ステージ（difficulty 28+）
 - [ ] **BGM**：Web Audio API で環境音（木のきしみ・環境SEなど）
@@ -512,4 +631,4 @@ labyrinth_balance_game_app.htmlが現在のゲームファイル（Stage 33ま�
 
 ---
 
-*最終更新: 2026-05-28 / 担当AI: Claude (Claude Code) / 対応バージョン: Stage 33まで（全ステージ動作確認済み）*
+*最終更新: 2026-06-01 / 担当AI: Claude (Claude Code) / 対応バージョン: Stage 33まで（全ステージ動作確認済み・PWA対応済み）*

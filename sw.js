@@ -1,9 +1,10 @@
-// ラビリンス Service Worker v1
+// ラビリンス Service Worker v2
 // オフライン対応・ホーム画面アイコンからの起動を可能にする
 
-const CACHE = 'labyrinth-v1';
+const CACHE = 'labyrinth-v2';
 const FILES = [
-  './labyrinth_balance_game_app.html',
+  './',
+  './index.html',
   './manifest.json',
   './icons/icon-192.png',
   './icons/icon-512.png',
