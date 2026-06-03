@@ -12,9 +12,10 @@
 | メインファイル | `index.html` (単一ファイル・約280KB) |
 | 技術スタック | HTML5 Canvas 2D / 純粋JavaScript / CSSのみ（外部ライブラリ・CDN完全なし） |
 | 動作環境 | Chrome / Safari / Edge でダブルクリックするだけ。オフライン完全動作 |
-| 操作方法 | マウスドラッグ or タッチ（傾き操作）/ キーボード矢印キー・WASD / スマホジャイロ |
+| 操作方法 | マウスドラッグ / スワイプ / Dパッド / 360°アナログジョイスティック / スマホジャイロ |
+| UI | タイトル画面・ハンバーガーメニュー（ドロワー）・ステージロックシステム |
 | PWA対応 | `manifest.json` / `sw.js` / `icons/` によりホーム画面インストール・オフライン起動が可能 |
-| リポジトリ | GitHub 管理（`index.html`, `manifest.json`, `sw.js`, `icons/`, `sw.js`） |
+| リポジトリ | GitHub 管理（`index.html`, `manifest.json`, `sw.js`, `icons/`） |
 
 **ゲーム内容：** 木製の迷宮盤をマウスで傾け、大理石ビー玉をスタートからゴールへ導く。穴に落ちたらリスタート。クリアタイムで☆1〜3を獲得。全33ステージ。
 
@@ -419,6 +420,54 @@ function updateRollSound(spd) {
   - `hr(490,566, 338)`, `hr(490,566, 414)` 削除（col6 row3→row4→row5が封鎖 → ゴール到達不可の原因）
   - `hr(338,414, 262)`, `hr(490,566, 262)` 追加（col4下方向・col6上部の未封鎖壁を補完）
 
+### 8-8. UI大改修（2026-06-03）
+
+#### タイトルスクリーン（`#titleScreen`）
+- 起動時に木製テーマのフルスクリーンタイトル画面を表示（z-index:600）
+- **「▶ はじめから」**：ステージ1からスタート
+- **「⏩ 続きから (Stage X)」**：前回クリア済みの続きから（クリア記録がある場合のみ表示）
+- `titleScreen.classList.add('hidden')` でゲーム画面へ移行
+
+#### ステージロック/アンロックシステム
+```javascript
+const clearedStages = new Set(JSON.parse(localStorage.getItem('clearedStages') || '[]'));
+function markStageCleared(index) { ... } // ゴール到達時に呼ぶ
+function isStageUnlocked(index) { return index === 0 || clearedStages.has(index - 1); }
+```
+- ドロワー内のステージボタン：未クリアは `.locked`（グレーアウト・disabled）
+- クリア済みは `.cleared`（緑グラデーション）
+- `updateStageSelect()` がクリア後に次ステージのロックを自動解除（`disabled = false` 付与）
+
+#### ハンバーガーメニュー・ドロワー（`#drawerOverlay` / `#drawer`）
+- 右下の **☰ボタン**（`#menuBtn`）でボトムシートを表示
+- `drawerOverlay.classList.add/remove('show')` でアニメーション付き開閉
+- `closeDrawer()` 関数でどこからでも閉じられる
+- ドロワー内コンテンツ：
+  - **ステージ選択**（`#stageSelect`）：ロック/クリア状態付きボタン
+  - **操作モード**（`.ctm-btn`）：スワイプ / Dパッド / 360° / ジャイロ、選択中は `.active`（緑）
+  - **感度スライダー**（`#sensSl2`）：既存の `#sensSlider` と双方向同期
+  - **効果音音量スライダー**（`#sfxSlider`）：`sfxVolume` をリアルタイム更新・localStorage保存
+  - **もう一度**（`#dwr-restart`）：現ステージリスタート後に閉じる
+  - **全リセット**（`#dwr-reset`）：confirm後 `clearedStages` クリア・ステージ1へ
+
+#### 360°アナログジョイスティック（`#joystick` / `#joystickBase` / `#joystickKnob`）
+```javascript
+input.joystickX = dx / JOY_RADIUS;  // -1〜1
+input.joystickY = dy / JOY_RADIUS;  // -1〜1
+```
+- 操作モード「🔘 360°」選択時のみ表示（`applyControlMode()` で show/hide）
+- `integrateInput()` にジョイスティックブランチを追加
+- タッチ識別子（`identifier`）追跡で多点タッチでも正確に動作
+- ノブは半径36pxにクランプ、離すと中央へ戻る
+
+#### 効果音音量（`sfxVolume`）統合
+- `playTone()`, `playBump()`, `playFall()`, `updateRollSound()` に `× sfxVolume` を組み込み
+- `sfxVolume <= 0` の場合は早期リターン（0除算を防ぐ）
+
+#### 旧UI非表示化
+- `#dbgBtn, #sensBox, #resetBtn, #settingsBtn, #gyroBtn { display:none!important }` でデバッグ・旧設定ボタン類を完全非表示
+- `#stageSelect` のデフォルト非表示、`#drawer #stageSelect` でドロワー内のみ表示
+
 ---
 
 ## 9. 新ステージ設計テンプレート（高難易度氷床）
@@ -468,11 +517,23 @@ function updateRollSound(spd) {
 
 ## 10. 動作確認チェックリスト
 
-- [ ] ブラウザで開いてゲームが表示される
-- [ ] ビー玉がマウスドラッグで動く
+### 基本動作
+- [ ] ブラウザで開いてタイトル画面が表示される
+- [ ] 「▶ はじめから」でゲーム開始、ビー玉がスワイプで動く
 - [ ] 穴に落ちるとリスタート演出が出る
-- [ ] ゴールに入るとクリア画面が出る
-- [ ] 画面上部のステージ番号ボタン（1〜33）でジャンプできる
+- [ ] ゴールに入るとクリア画面が出る・次のステージのロックが解除される
+
+### 新UI
+- [ ] 右下の **☰ボタン** でドロワーが開く
+- [ ] ドロワー内でステージ選択できる（クリア済みは緑、未クリアはグレー）
+- [ ] 「🔘 360°」を選ぶと左下にジョイスティックが表示され、タッチで操作できる
+- [ ] 「🕹 Dパッド」を選ぶと十字キーが左下に表示される
+- [ ] 感度スライダーと効果音スライダーが機能する（効果音量0で無音になる）
+- [ ] 「全リセット」でステージロックが1に戻る
+- [ ] ブラウザ再起動後もクリア済みステージが保持されている（localStorage）
+- [ ] クリア記録がある場合「⏩ 続きから」ボタンがタイトルに表示される
+
+### ステージ動作
 - [ ] Stage 21 以降で氷の表面描画・滑り物理が動作する
 - [ ] Stage 22 以降で脈動する穴が動いている
 - [ ] Stage 23 以降でバネバンパーが弾き返す
@@ -546,7 +607,7 @@ labyrinth-game/
 ### sw.js キャッシュ対象
 
 ```javascript
-const CACHE = 'labyrinth-v2';
+const CACHE = 'labyrinth-v3';  // UI大改修(2026-06-03)でv3に更新
 const FILES = [
   './',
   './index.html',
@@ -622,13 +683,19 @@ EOF
 
 - [ ] **Stage 34〜**: さらに高難易度ステージ（difficulty 28+）
 - [ ] **BGM**：Web Audio API で環境音（木のきしみ・環境SEなど）
+- [ ] **PWAアイコン差し替え**：本物の木製ラビリンスボードの写真への変更（ファイルパス提供待ち）
 - [ ] **移動する壁**：往復する柵ギミックのステージ
 - [ ] **タイムアタックモード**：全ステージ通しのタイム計測・ランキング
 - [ ] **リプレイ保存**：クリア後に軌跡を再生
 - [ ] **難易度選択**：簡単/普通/難しいで穴サイズや摩擦を変える
 - [ ] **本物BRIO配置ステージ**：83穴番号順の本家マップ再現
-- [ ] **モバイル最適化**：タッチ操作の感度チューニング
+- [x] ~~モバイル最適化：タッチ操作の感度チューニング~~ → ドロワー内スライダーで実装済み
+- [x] ~~デバッグ非表示~~ → CSS `display:none!important` で実装済み
+- [x] ~~360°バーチャルパッド~~ → アナログジョイスティック実装済み
+- [x] ~~ハンバーガーメニュー~~ → ドロワーUI実装済み
+- [x] ~~タイトル/スタート画面~~ → 実装済み
+- [x] ~~ステージロックシステム~~ → localStorage永続化で実装済み
 
 ---
 
-*最終更新: 2026-06-01 / 担当AI: Claude (Claude Code) / 対応バージョン: Stage 33まで（全ステージ動作確認済み・PWA対応済み）*
+*最終更新: 2026-06-03 / 担当AI: Claude (Claude Code) / 対応バージョン: Stage 33まで（全ステージ動作確認済み・PWA対応済み・UI大改修済み）*
