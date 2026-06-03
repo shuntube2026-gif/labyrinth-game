@@ -427,36 +427,102 @@ kbd{
   box-shadow:0 4px 12px rgba(60,30,8,.35)}
 #joystickKnob.active{background:linear-gradient(145deg,#b89050,#7a5020)}
 /* ── タイトルスクリーン ── */
+@keyframes ttl-fadein{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+@keyframes ttl-float{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-8px) rotate(1deg)}}
+@keyframes ttl-glow{0%,100%{box-shadow:0 6px 0 #134d20,0 10px 28px rgba(0,0,0,.38),0 0 0 0 rgba(80,200,80,.5)}55%{box-shadow:0 6px 0 #134d20,0 10px 28px rgba(0,0,0,.38),0 0 0 11px rgba(80,200,80,0)}}
+@keyframes ttl-marble{0%{transform:translateX(0) rotate(0deg)}100%{transform:translateX(3px) rotate(15deg)}}
+
 #titleScreen{
-  position:fixed;inset:0;z-index:600;
-  background:linear-gradient(155deg,#c07a30 0%,#8a4c18 55%,#5c2e0e 100%);
-  display:flex;align-items:center;justify-content:center}
+  position:fixed;inset:0;z-index:600;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
+  background:
+    repeating-linear-gradient(89deg,transparent 0,transparent 9px,rgba(255,200,110,.022) 9px,rgba(255,200,110,.022) 10px),
+    repeating-linear-gradient(91deg,transparent 0,transparent 22px,rgba(0,0,0,.018) 22px,rgba(0,0,0,.018) 23px),
+    radial-gradient(ellipse 150% 110% at 50% -5%,#dc8838 0%,#8a4012 42%,#3c1806 100%)}
 #titleScreen.hidden{display:none}
-.ttl-card{
-  background:rgba(255,248,232,.93);border-radius:26px;
-  padding:36px 28px 30px;max-width:300px;width:86vw;
-  box-shadow:0 16px 48px rgba(0,0,0,.45),inset 0 0 0 3px rgba(92,46,14,.18);
-  display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center}
-.ttl-icon{font-size:56px;line-height:1}
-.ttl-name{font-size:clamp(19px,5.5vw,25px);font-weight:900;color:var(--wood-dk);line-height:1.3}
-.ttl-sub{font-size:13px;color:rgba(43,22,7,.58)}
+#titleScreen::before{
+  content:'';position:absolute;
+  width:700px;height:700px;border-radius:50%;
+  border:1px solid rgba(255,195,80,.07);
+  top:50%;left:50%;transform:translate(-50%,-60%);
+  box-shadow:0 0 0 80px rgba(255,175,65,.04),0 0 0 160px rgba(255,150,45,.023),0 0 0 250px rgba(255,130,30,.012);
+  pointer-events:none}
+#titleScreen::after{
+  content:'';position:absolute;bottom:-80px;left:50%;transform:translateX(-50%);
+  width:120%;height:200px;border-radius:50%;
+  background:rgba(0,0,0,.18);filter:blur(40px);pointer-events:none}
+.ttl-inner{
+  position:relative;z-index:1;
+  display:flex;flex-direction:column;align-items:center;
+  padding:12px 24px 44px;width:100%;max-width:340px;
+  text-align:center;
+  animation:ttl-fadein .65s cubic-bezier(.16,.84,.44,1) both}
+.ttl-preview-wrap{
+  width:116px;height:116px;border-radius:22px;
+  background:linear-gradient(140deg,#c07828,#f2cc82 38%,#a85520 72%,#5c2e0e);
+  box-shadow:0 12px 36px rgba(0,0,0,.58),inset 0 0 0 3px rgba(38,12,2,.45),inset 0 0 0 14px rgba(226,178,104,.14);
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:22px;
+  animation:ttl-float 4s ease-in-out 0.8s infinite}
+.ttl-wordmark{
+  font-size:clamp(26px,7.8vw,40px);font-weight:900;
+  letter-spacing:7px;text-indent:7px;
+  color:#f5d478;
+  text-shadow:0 2px 0 rgba(78,26,0,.9),0 5px 18px rgba(0,0,0,.55),0 0 60px rgba(255,185,55,.2);
+  line-height:1;margin-bottom:9px}
+.ttl-tagline{
+  font-size:10px;font-weight:700;letter-spacing:3px;text-indent:3px;
+  color:rgba(245,205,100,.55);margin-bottom:10px;text-transform:uppercase}
+.ttl-jp{
+  font-size:clamp(15px,4.2vw,19px);font-weight:700;
+  color:rgba(255,244,210,.9);letter-spacing:1.5px;line-height:1.7;
+  text-shadow:0 2px 10px rgba(0,0,0,.48);margin-bottom:16px}
+.ttl-stages{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:4px 16px;border-radius:999px;
+  border:1px solid rgba(245,210,115,.28);
+  color:rgba(245,210,115,.65);
+  font-size:11px;font-weight:700;letter-spacing:2px;text-indent:2px;
+  margin-bottom:32px}
+.ttl-stages::before,.ttl-stages::after{content:'──';opacity:.38;font-size:8px}
 .ttl-btn{
-  width:100%;padding:14px;border:none;border-radius:14px;
-  font-size:16px;font-weight:800;cursor:pointer;
-  transition:transform .12s,filter .12s;box-shadow:0 4px 14px rgba(0,0,0,.22)}
-.ttl-btn:active{transform:translateY(2px)}
-.ttl-btn-start{background:linear-gradient(#3a9944,#1e6b2e);color:#fff}
-.ttl-btn-cont{background:linear-gradient(#fffaf0,#e8d090);color:var(--ink);border:1px solid rgba(92,46,14,.3)!important}
+  width:100%;max-width:280px;
+  border:none;border-radius:16px;cursor:pointer;
+  font-family:inherit;font-weight:900;letter-spacing:1.5px;
+  transition:transform .12s,box-shadow .12s}
+.ttl-btn:active{transform:translateY(4px)!important}
+.ttl-btn-start{
+  padding:17px;font-size:17px;
+  background:linear-gradient(162deg,#84ce62 0%,#3a9944 52%,#1a6028 100%);
+  color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.38);
+  box-shadow:0 6px 0 #0f4018,0 10px 30px rgba(0,0,0,.38),inset 0 1px 0 rgba(255,255,255,.3);
+  margin-bottom:13px;
+  animation:ttl-glow 2.6s ease-in-out 1.8s infinite}
+.ttl-btn-start:active{
+  box-shadow:0 2px 0 #0f4018,0 4px 14px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.3)!important;
+  animation:none}
+.ttl-btn-cont{
+  padding:13px;font-size:14px;
+  background:rgba(255,246,224,.08);
+  border:1.5px solid rgba(245,210,115,.3)!important;
+  color:rgba(255,242,205,.82);
+  box-shadow:0 2px 14px rgba(0,0,0,.18);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
 </style>
 </head>
 <body>
 <!-- ── タイトルスクリーン ── -->
 <div id="titleScreen">
-  <div class="ttl-card">
-    <div class="ttl-icon">🪵</div>
-    <div class="ttl-name">木製ラビリンス<br>迷宮バランスゲーム</div>
-    <div class="ttl-sub">全40ステージ</div>
-    <button class="ttl-btn ttl-btn-start" id="titleStartBtn">▶ はじめから</button>
+  <div class="ttl-inner">
+    <!-- ミニ盤面プレビュー（JS で描画） -->
+    <div class="ttl-preview-wrap">
+      <canvas id="titleCanvas" width="90" height="90" style="display:block;border-radius:14px"></canvas>
+    </div>
+    <div class="ttl-tagline">WOODEN BOARD GAME</div>
+    <div class="ttl-wordmark">LABYRINTH</div>
+    <div class="ttl-jp">木製ラビリンス<br>迷宮バランスゲーム</div>
+    <div class="ttl-stages">全40ステージ</div>
+    <button class="ttl-btn ttl-btn-start" id="titleStartBtn">▶ &nbsp;は じ め か ら</button>
     <button class="ttl-btn ttl-btn-cont"  id="titleContBtn"  style="display:none">⏩ 続きから (Stage 1)</button>
   </div>
 </div>
@@ -6036,6 +6102,78 @@ function closeDrawer() {
   document.getElementById('drawerOverlay').classList.remove('show');
 }
 
+/** タイトル画面のミニ盤面プレビューを Canvas に描画する */
+function drawTitlePreview() {
+  const c = document.getElementById('titleCanvas');
+  if (!c) return;
+  const ctx = c.getContext('2d');
+  const s = c.width; // 90px
+
+  // 木製フロア
+  const bg = ctx.createLinearGradient(0, 0, s, s);
+  bg.addColorStop(0,   '#eacf80');
+  bg.addColorStop(0.4, '#d4aa58');
+  bg.addColorStop(1,   '#b88840');
+  ctx.fillStyle = bg;
+  ctx.beginPath();
+  ctx.roundRect(0, 0, s, s, 10);
+  ctx.fill();
+
+  // 木目ライン
+  ctx.strokeStyle = 'rgba(130,70,15,.07)';
+  ctx.lineWidth = 1;
+  for (let y = 5; y < s; y += 8) {
+    ctx.beginPath();
+    ctx.moveTo(0,  y + Math.sin(y * 0.25) * 1.5);
+    ctx.lineTo(s,  y + Math.sin(y * 0.25 + 2.5) * 1.5);
+    ctx.stroke();
+  }
+
+  // 迷路壁（蛇行パターン）
+  ctx.strokeStyle = '#5c2e0e';
+  ctx.lineWidth = 3.5;
+  ctx.lineCap = 'round';
+  [
+    [10, 54, 20],
+    [36, 80, 35],
+    [10, 54, 50],
+    [36, 80, 65],
+  ].forEach(([x1, x2, y]) => {
+    ctx.beginPath(); ctx.moveTo(x1, y); ctx.lineTo(x2, y); ctx.stroke();
+  });
+
+  // ビー玉（左上）
+  const ballG = ctx.createRadialGradient(14, 9, 1, 16, 11, 8);
+  ballG.addColorStop(0,   '#ffffff');
+  ballG.addColorStop(0.3, '#c8daff');
+  ballG.addColorStop(0.75,'#4468c8');
+  ballG.addColorStop(1,   '#1a2e88');
+  ctx.beginPath();
+  ctx.arc(16, 11, 7, 0, Math.PI * 2);
+  ctx.fillStyle = ballG;
+  ctx.fill();
+  // ハイライト
+  ctx.beginPath();
+  ctx.arc(13, 9, 2.5, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(255,255,255,.65)';
+  ctx.fill();
+
+  // ゴール（右下・緑丸）
+  ctx.beginPath();
+  ctx.arc(75, 79, 7, 0, Math.PI * 2);
+  ctx.fillStyle = '#28a848';
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(75, 79, 4.5, 0, Math.PI * 2);
+  ctx.strokeStyle = 'rgba(255,255,255,.45)';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.arc(73, 77, 2, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(255,255,255,.38)';
+  ctx.fill();
+}
+
 function registerEvents() {
   // キーボード
   window.addEventListener('keydown', onKeyDown);
@@ -6392,6 +6530,7 @@ function init() {
   }
   // タイトル画面を表示（ゲームはまだ開始しない）
   titleScreen.classList.remove('hidden');
+  drawTitlePreview(); // ミニ盤面プレビューを描画
   // ゲームループは先に起動しておく（描画が止まらないように）
   loadStage(0);
   requestAnimationFrame(gameLoop);
