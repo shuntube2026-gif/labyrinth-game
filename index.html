@@ -278,36 +278,33 @@ kbd{
   #boardWrap{padding:10px;border-radius:16px}
   #overlay{inset:10px}
 }
-/* ─────────────────────────── Dパッドオーバーレイ ─────────────────────────── */
+/* ─────────────────────────── Dパッド（キャンバス外・下） ─────────────────────────── */
 #dpad{
-  position:absolute;
-  bottom:22px;
-  left:50%;
-  transform:translateX(-50%);
   display:none;
-  grid-template-columns:repeat(3,62px);
-  grid-template-rows:repeat(3,62px);
-  gap:5px;
-  z-index:10;
+  grid-template-columns:repeat(3,84px);
+  grid-template-rows:repeat(3,84px);
+  gap:7px;
   user-select:none;
 }
 .dp-btn{
-  width:62px;height:62px;
-  border-radius:14px;
-  border:2px solid rgba(255,255,255,.45);
-  background:rgba(0,0,0,.32);
-  color:#fff;
-  font-size:26px;
+  width:84px;height:84px;
+  border-radius:18px;
+  border:2px solid rgba(92,46,14,.35);
+  background:rgba(255,248,232,.88);
+  color:var(--ink);
+  font-size:34px;
   display:flex;align-items:center;justify-content:center;
   cursor:pointer;
   touch-action:none;
-  backdrop-filter:blur(6px);
-  -webkit-backdrop-filter:blur(6px);
-  box-shadow:0 2px 8px rgba(0,0,0,.25);
+  box-shadow:0 3px 10px rgba(92,46,14,.22),inset 0 1px 0 rgba(255,255,255,.7);
   transition:background .08s,transform .08s;
 }
-.dp-btn.pressed,.dp-btn:active{background:rgba(255,255,255,.24);transform:scale(.92)}
+.dp-btn.pressed,.dp-btn:active{background:rgba(160,100,43,.22);transform:scale(.92)}
 .dp-empty{background:transparent!important;border:none!important;pointer-events:none;box-shadow:none}
+/* コントロールエリア（Dパッド / ジョイスティックを収容） */
+#controlArea{
+  display:flex;align-items:center;justify-content:center;
+  padding:10px 0 4px;min-height:0}
 /* オーバーレイはDパッドより上に表示 */
 #overlay.show{opacity:1;pointer-events:auto;z-index:20}
 /* ─────────────────────────── 設定モーダル ─────────────────────────── */
@@ -358,19 +355,15 @@ kbd{
 /* ステージ ロック/クリア済みスタイル */
 .stage-btn.locked{opacity:.32;cursor:not-allowed!important;background:linear-gradient(#d8d0c0,#c4bcaa)!important;color:rgba(43,22,7,.25)!important;border-color:rgba(92,46,14,.12)!important}
 .stage-btn.cleared{background:linear-gradient(#7bc87e,#49995c)!important;color:#fff!important;border-color:#3a8840!important}
-/* Dパッド 左下へ */
-#dpad{left:14px;right:auto;bottom:14px;transform:none}
-/* ── ハンバーガーボタン ── */
+/* ── ハンバーガーボタン（HUDに移動） ── */
 #menuBtn{
-  position:absolute;bottom:14px;right:12px;
-  width:52px;height:52px;border-radius:14px;
-  border:2px solid rgba(255,255,255,.42);
-  background:rgba(0,0,0,.34);color:#fff;font-size:22px;
+  width:40px;height:40px;border-radius:12px;
+  border:1px solid rgba(92,46,14,.28);
+  background:rgba(255,248,232,.82);color:var(--ink);font-size:19px;
   display:flex;align-items:center;justify-content:center;
-  cursor:pointer;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
-  z-index:15;touch-action:none;padding:0;font-family:inherit;
-  box-shadow:0 2px 10px rgba(0,0,0,.28);transition:background .1s}
-#menuBtn:active{background:rgba(255,255,255,.22)}
+  cursor:pointer;padding:0;font-family:inherit;flex-shrink:0;
+  box-shadow:0 1px 4px rgba(72,35,8,.15);transition:background .1s}
+#menuBtn:active{background:rgba(92,46,14,.14)}
 /* ── ボトムドロワー ── */
 #drawerOverlay{
   position:fixed;inset:0;background:rgba(0,0,0,.46);
@@ -414,22 +407,25 @@ kbd{
   transition:filter .1s,transform .1s;margin:3px}
 .dwr-btn:active{transform:translateY(1px)}
 .dwr-btn.danger{background:linear-gradient(#b04020,#7a2c12);color:#fff;border-color:#6a2010}
-/* ── アナログジョイスティック ── */
+/* ── アナログジョイスティック（キャンバス外・下） ── */
 #joystick{
-  position:absolute;bottom:14px;left:14px;
-  width:114px;height:114px;display:none;
-  z-index:12;user-select:none;touch-action:none}
+  display:none;
+  width:180px;height:180px;
+  align-items:center;justify-content:center;
+  user-select:none;touch-action:none}
 #joystickBase{
-  width:114px;height:114px;border-radius:50%;
-  background:rgba(0,0,0,.22);border:2px solid rgba(255,255,255,.32);
-  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
-  position:relative;box-shadow:0 2px 10px rgba(0,0,0,.28)}
+  width:180px;height:180px;border-radius:50%;
+  background:rgba(255,248,232,.78);
+  border:3px solid rgba(92,46,14,.35);
+  position:relative;
+  box-shadow:0 4px 16px rgba(92,46,14,.22),inset 0 1px 0 rgba(255,255,255,.6)}
 #joystickKnob{
-  width:48px;height:48px;border-radius:50%;
-  background:rgba(255,255,255,.58);border:2px solid rgba(255,255,255,.75);
+  width:72px;height:72px;border-radius:50%;
+  background:linear-gradient(145deg,#d4b06a,#a07030);
+  border:3px solid rgba(92,46,14,.5);
   position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-  box-shadow:0 2px 8px rgba(0,0,0,.28)}
-#joystickKnob.active{background:rgba(255,255,255,.84)}
+  box-shadow:0 4px 12px rgba(60,30,8,.35)}
+#joystickKnob.active{background:linear-gradient(145deg,#b89050,#7a5020)}
 /* ── タイトルスクリーン ── */
 #titleScreen{
   position:fixed;inset:0;z-index:600;
@@ -466,7 +462,7 @@ kbd{
 </div>
 <div id="app">
 
-  <!-- HUD: ステージ情報・タイマー・星 -->
+  <!-- HUD: ステージ情報・タイマー・星・メニュー -->
   <header id="hud">
     <div>
       <div id="stageLabel">Stage <span id="stageNo">1/11</span></div>
@@ -475,6 +471,7 @@ kbd{
     <div id="statsBadges">
       <span class="badge">タイム <b id="timer">0.0</b>s</span>
       <span class="badge">評価 <b id="stars">---</b></span>
+      <button id="menuBtn" aria-label="メニュー">☰</button>
     </div>
   </header>
 
@@ -490,6 +487,10 @@ kbd{
       <button class="ov-btn ov-btn-next"    id="ovNext"    style="display:none">次のステージ →</button>
       <button class="ov-btn ov-btn-all"     id="ovAll"     style="display:none">最初から</button>
     </div>
+  </main>
+
+  <!-- コントロールエリア（Dパッド / 360°ジョイスティック） -->
+  <div id="controlArea">
     <!-- バーチャルDパッド（dpadモード時に表示） -->
     <div id="dpad">
       <div class="dp-empty"></div>
@@ -506,9 +507,7 @@ kbd{
     <div id="joystick">
       <div id="joystickBase"><div id="joystickKnob"></div></div>
     </div>
-    <!-- ハンバーガーメニューボタン -->
-    <button id="menuBtn" aria-label="メニュー">☰</button>
-  </main>
+  </div>
 
   <!-- コントロール -->
   <section id="controls">
@@ -524,9 +523,6 @@ kbd{
       <b id="sensVal">5</b>
     </div>
   </section>
-
-  <!-- ステージ選択 -->
-  <div id="stageSelect"></div>
 
   <!-- メッセージ -->
   <div id="msg">最初に少し傾けるとタイマーが始まります。</div>
@@ -612,6 +608,7 @@ kbd{
     <div class="dwr-sec">
       <div class="dwr-sec-ttl">🔁 アクション</div>
       <button class="dwr-btn" id="dwr-restart">もう一度</button>
+      <button class="dwr-btn" id="dwr-top">🏠 トップ画面に戻る</button>
       <button class="dwr-btn danger" id="dwr-reset">最初から（全リセット）</button>
     </div>
   </div>
@@ -4160,12 +4157,19 @@ async function requestGyroPermission() {
 
 /** 操作モードを切替え：UI表示・ガイドテキスト・Dパッドを同期する */
 function applyControlMode() {
-  const dpadEl     = document.getElementById('dpad');
-  const joystickEl = document.getElementById('joystick');
-  const guideEl    = document.getElementById('guide');
+  const dpadEl      = document.getElementById('dpad');
+  const joystickEl  = document.getElementById('joystick');
+  const controlArea = document.getElementById('controlArea');
+  const guideEl     = document.getElementById('guide');
   // Dパッド / ジョイスティック 表示切替
   dpadEl.style.display = controlMode === 'dpad' ? 'grid' : 'none';
-  if (joystickEl) joystickEl.style.display = controlMode === 'joystick' ? 'block' : 'none';
+  if (joystickEl) joystickEl.style.display = controlMode === 'joystick' ? 'flex' : 'none';
+  // コントロールエリアはパッドが表示される場合のみ高さを持つ
+  if (controlArea) {
+    const hasPad = controlMode === 'dpad' || controlMode === 'joystick';
+    controlArea.style.padding = hasPad ? '12px 0 8px' : '0';
+    controlArea.style.minHeight = hasPad ? '' : '0';
+  }
   // ガイドテキスト更新
   const kbdHint = '<kbd>↑↓←→</kbd> キー &nbsp;|&nbsp; <kbd>R</kbd>：リスタート';
   if (controlMode === 'swipe') {
@@ -6273,6 +6277,25 @@ function registerEvents() {
     closeDrawer();
     restartStage();
   });
+  document.getElementById('dwr-top').addEventListener('click', () => {
+    closeDrawer();
+    // タイトル画面を再表示
+    const titleScreen  = document.getElementById('titleScreen');
+    const titleContBtn = document.getElementById('titleContBtn');
+    let continueIdx = 0;
+    for (let i = TOTAL_STAGES - 1; i >= 0; i--) {
+      if (isStageUnlocked(i)) { continueIdx = i; break; }
+    }
+    if (continueIdx > 0) {
+      titleContBtn.style.display = '';
+      titleContBtn.textContent = `⏩ 続きから (Stage ${continueIdx + 1})`;
+      titleContBtn.dataset.stageIndex = continueIdx;
+    } else {
+      titleContBtn.style.display = 'none';
+    }
+    titleScreen.classList.remove('hidden');
+  });
+
   document.getElementById('dwr-reset').addEventListener('click', () => {
     if (!confirm('全ステージのクリア記録をリセットしてもよいですか？')) return;
     clearedStages.clear();
@@ -6298,7 +6321,7 @@ function registerEvents() {
   // ─── 360°アナログジョイスティック ───
   const joystickBase = document.getElementById('joystickBase');
   const joystickKnob = document.getElementById('joystickKnob');
-  const JOY_RADIUS = 36; // ノブの最大移動半径(px)
+  const JOY_RADIUS = 54; // ノブの最大移動半径(px) ※180px base に合わせて拡大
   let joyTouchId = null;
   let joyBaseRect = null;
 
