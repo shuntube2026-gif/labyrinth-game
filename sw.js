@@ -1,7 +1,7 @@
-// ラビリンス Service Worker v2
+// ラビリンス Service Worker v3
 // オフライン対応・ホーム画面アイコンからの起動を可能にする
 
-const CACHE = 'labyrinth-v2';
+const CACHE = 'labyrinth-v3';
 const FILES = [
   './',
   './index.html',

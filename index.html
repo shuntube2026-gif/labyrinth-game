@@ -347,9 +347,123 @@ kbd{
   margin-top:6px;box-shadow:0 3px 8px rgba(0,0,0,.2);
 }
 #settingsClose:active{opacity:.85}
+
+/* ═══ 追加UI ═══ */
+/* デバッグ・不要ボタン非表示 */
+#dbgBtn,#sensBox,#resetBtn,#settingsBtn,#gyroBtn{display:none!important}
+/* ステージ選択を本体から非表示→ドロワーに移動 */
+#stageSelect{display:none}
+/* ステージ番号センタリング */
+.stage-btn{display:flex!important;align-items:center!important;justify-content:center!important}
+/* ステージ ロック/クリア済みスタイル */
+.stage-btn.locked{opacity:.32;cursor:not-allowed!important;background:linear-gradient(#d8d0c0,#c4bcaa)!important;color:rgba(43,22,7,.25)!important;border-color:rgba(92,46,14,.12)!important}
+.stage-btn.cleared{background:linear-gradient(#7bc87e,#49995c)!important;color:#fff!important;border-color:#3a8840!important}
+/* Dパッド 左下へ */
+#dpad{left:14px;right:auto;bottom:14px;transform:none}
+/* ── ハンバーガーボタン ── */
+#menuBtn{
+  position:absolute;bottom:14px;right:12px;
+  width:52px;height:52px;border-radius:14px;
+  border:2px solid rgba(255,255,255,.42);
+  background:rgba(0,0,0,.34);color:#fff;font-size:22px;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  z-index:15;touch-action:none;padding:0;font-family:inherit;
+  box-shadow:0 2px 10px rgba(0,0,0,.28);transition:background .1s}
+#menuBtn:active{background:rgba(255,255,255,.22)}
+/* ── ボトムドロワー ── */
+#drawerOverlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.46);
+  z-index:400;display:none;align-items:flex-end}
+#drawerOverlay.show{display:flex}
+#drawer{
+  width:100%;max-height:82vh;background:var(--panel);
+  border-radius:22px 22px 0 0;padding:0 16px 36px;
+  overflow-y:auto;box-shadow:0 -8px 32px rgba(0,0,0,.3);
+  transform:translateY(100%);transition:transform .3s cubic-bezier(.25,.8,.25,1)}
+#drawerOverlay.show #drawer{transform:translateY(0)}
+.dwr-handle{width:42px;height:4px;background:rgba(92,46,14,.22);border-radius:2px;margin:12px auto 4px}
+.dwr-hdr{display:flex;align-items:center;justify-content:space-between;padding:8px 0 10px}
+.dwr-hdr-title{font-size:16px;font-weight:800;color:var(--wood-dk)}
+#drawerClose{
+  width:30px;height:30px;border-radius:50%;border:none;
+  background:rgba(92,46,14,.12);color:var(--wood-dk);
+  font-size:16px;font-weight:700;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;padding:0}
+.dwr-sec{border-top:1px solid rgba(92,46,14,.1);padding:12px 0 6px}
+.dwr-sec-ttl{font-size:11px;font-weight:700;color:rgba(92,46,14,.55);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
+/* ドロワー内ステージ選択表示 */
+#drawer #stageSelect{display:flex!important;flex-wrap:wrap;gap:4px;justify-content:flex-start;padding:0}
+/* 操作モードボタン */
+.ctm-row{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:4px}
+.ctm-btn{
+  flex:1;min-width:60px;padding:9px 4px;border-radius:10px;
+  border:2px solid rgba(92,46,14,.18);background:rgba(255,248,232,.8);
+  color:var(--ink);font-size:11px;font-weight:700;cursor:pointer;text-align:center;transition:all .12s}
+.ctm-btn.active{background:linear-gradient(#3a9944,#1e6b2e);color:#fff;border-color:#1a6029}
+/* 音量・感度スライダー行 */
+.vol-row,.sens-row2{display:flex;align-items:center;gap:10px;font-size:12px;margin-bottom:8px}
+.vol-row label,.sens-row2 label{width:56px;font-weight:700}
+.vol-row input,.sens-row2 input{flex:1;accent-color:#8a4018}
+.vol-num{width:18px;font-size:11px;font-weight:700;text-align:right}
+/* ドロワーアクションボタン */
+.dwr-btn{
+  padding:11px 18px;border-radius:11px;
+  border:1px solid rgba(92,46,14,.28);background:linear-gradient(#fffaf0,#e8d090);
+  color:var(--ink);font-size:13px;font-weight:700;cursor:pointer;
+  transition:filter .1s,transform .1s;margin:3px}
+.dwr-btn:active{transform:translateY(1px)}
+.dwr-btn.danger{background:linear-gradient(#b04020,#7a2c12);color:#fff;border-color:#6a2010}
+/* ── アナログジョイスティック ── */
+#joystick{
+  position:absolute;bottom:14px;left:14px;
+  width:114px;height:114px;display:none;
+  z-index:12;user-select:none;touch-action:none}
+#joystickBase{
+  width:114px;height:114px;border-radius:50%;
+  background:rgba(0,0,0,.22);border:2px solid rgba(255,255,255,.32);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  position:relative;box-shadow:0 2px 10px rgba(0,0,0,.28)}
+#joystickKnob{
+  width:48px;height:48px;border-radius:50%;
+  background:rgba(255,255,255,.58);border:2px solid rgba(255,255,255,.75);
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  box-shadow:0 2px 8px rgba(0,0,0,.28)}
+#joystickKnob.active{background:rgba(255,255,255,.84)}
+/* ── タイトルスクリーン ── */
+#titleScreen{
+  position:fixed;inset:0;z-index:600;
+  background:linear-gradient(155deg,#c07a30 0%,#8a4c18 55%,#5c2e0e 100%);
+  display:flex;align-items:center;justify-content:center}
+#titleScreen.hidden{display:none}
+.ttl-card{
+  background:rgba(255,248,232,.93);border-radius:26px;
+  padding:36px 28px 30px;max-width:300px;width:86vw;
+  box-shadow:0 16px 48px rgba(0,0,0,.45),inset 0 0 0 3px rgba(92,46,14,.18);
+  display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center}
+.ttl-icon{font-size:56px;line-height:1}
+.ttl-name{font-size:clamp(19px,5.5vw,25px);font-weight:900;color:var(--wood-dk);line-height:1.3}
+.ttl-sub{font-size:13px;color:rgba(43,22,7,.58)}
+.ttl-btn{
+  width:100%;padding:14px;border:none;border-radius:14px;
+  font-size:16px;font-weight:800;cursor:pointer;
+  transition:transform .12s,filter .12s;box-shadow:0 4px 14px rgba(0,0,0,.22)}
+.ttl-btn:active{transform:translateY(2px)}
+.ttl-btn-start{background:linear-gradient(#3a9944,#1e6b2e);color:#fff}
+.ttl-btn-cont{background:linear-gradient(#fffaf0,#e8d090);color:var(--ink);border:1px solid rgba(92,46,14,.3)!important}
 </style>
 </head>
 <body>
+<!-- ── タイトルスクリーン ── -->
+<div id="titleScreen">
+  <div class="ttl-card">
+    <div class="ttl-icon">🪵</div>
+    <div class="ttl-name">木製ラビリンス<br>迷宮バランスゲーム</div>
+    <div class="ttl-sub">全40ステージ</div>
+    <button class="ttl-btn ttl-btn-start" id="titleStartBtn">▶ はじめから</button>
+    <button class="ttl-btn ttl-btn-cont"  id="titleContBtn"  style="display:none">⏩ 続きから (Stage 1)</button>
+  </div>
+</div>
 <div id="app">
 
   <!-- HUD: ステージ情報・タイマー・星 -->
@@ -388,6 +502,12 @@ kbd{
       <button class="dp-btn" id="dpadDown"  aria-label="下">▼</button>
       <div class="dp-empty"></div>
     </div>
+    <!-- 360°アナログジョイスティック -->
+    <div id="joystick">
+      <div id="joystickBase"><div id="joystickKnob"></div></div>
+    </div>
+    <!-- ハンバーガーメニューボタン -->
+    <button id="menuBtn" aria-label="メニュー">☰</button>
   </main>
 
   <!-- コントロール -->
@@ -448,6 +568,52 @@ kbd{
       </div>
     </label>
     <button id="settingsClose">決定</button>
+  </div>
+</div>
+
+<!-- ── ボトムドロワー ── -->
+<div id="drawerOverlay">
+  <div id="drawer">
+    <div class="dwr-handle"></div>
+    <div class="dwr-hdr">
+      <span class="dwr-hdr-title">☰ メニュー</span>
+      <button id="drawerClose">✕</button>
+    </div>
+    <!-- ステージ選択 -->
+    <div class="dwr-sec">
+      <div class="dwr-sec-ttl">📋 ステージ選択</div>
+      <div id="stageSelect"></div>
+    </div>
+    <!-- 操作モード -->
+    <div class="dwr-sec">
+      <div class="dwr-sec-ttl">🎮 操作モード</div>
+      <div class="ctm-row">
+        <button class="ctm-btn" data-mode="swipe">👆<br>スワイプ</button>
+        <button class="ctm-btn" data-mode="dpad">🕹<br>Dパッド</button>
+        <button class="ctm-btn" data-mode="joystick">🔘<br>360°</button>
+        <button class="ctm-btn" data-mode="gyro">📱<br>ジャイロ</button>
+      </div>
+    </div>
+    <!-- 感度・音量 -->
+    <div class="dwr-sec">
+      <div class="dwr-sec-ttl">⚙ 設定</div>
+      <div class="sens-row2">
+        <label>感度</label>
+        <input id="sensSl2" type="range" min="1" max="10" step="1" value="5">
+        <span class="vol-num" id="sensV2">5</span>
+      </div>
+      <div class="vol-row">
+        <label>効果音</label>
+        <input id="sfxSlider" type="range" min="0" max="10" step="1" value="7">
+        <span class="vol-num" id="sfxVal">7</span>
+      </div>
+    </div>
+    <!-- アクション -->
+    <div class="dwr-sec">
+      <div class="dwr-sec-ttl">🔁 アクション</div>
+      <button class="dwr-btn" id="dwr-restart">もう一度</button>
+      <button class="dwr-btn danger" id="dwr-reset">最初から（全リセット）</button>
+    </div>
   </div>
 </div>
 
@@ -3805,11 +3971,28 @@ const input = {
   gyroActive: false, // ジャイロ使用中フラグ
   dpadX: 0,          // Dパッド由来 X
   dpadY: 0,          // Dパッド由来 Y
+  joystickX: 0,      // 360°ジョイスティック由来 X（-1〜1）
+  joystickY: 0,      // 360°ジョイスティック由来 Y（-1〜1）
   keys:  new Set(),  // 押下中キー集合
 };
 
 /** 操作モード: 'swipe' | 'dpad' | 'gyro' */
 let controlMode = localStorage.getItem('controlMode') || 'swipe';
+
+// ── クリア済みステージ管理 ──
+const clearedStages = new Set(
+  JSON.parse(localStorage.getItem('clearedStages') || '[]')
+);
+function markStageCleared(index) {
+  clearedStages.add(index);
+  localStorage.setItem('clearedStages', JSON.stringify([...clearedStages]));
+}
+function isStageUnlocked(index) {
+  return index === 0 || clearedStages.has(index - 1);
+}
+
+// ── SFX音量 ──
+let sfxVolume = Number(localStorage.getItem('sfxVolume') ?? 7) / 10;
 
 /** スワイプ操作の基準点 */
 let _swipeStartX = 0, _swipeStartY = 0;
@@ -3938,6 +4121,10 @@ function integrateInput() {
     // Dパッド（キー補助）
     targetX = input.dpadX + input.keyX * 0.15;
     targetY = input.dpadY + input.keyY * 0.15;
+  } else if (controlMode === 'joystick') {
+    // 360°アナログジョイスティック（キー補助）
+    targetX = input.joystickX + input.keyX * 0.1;
+    targetY = input.joystickY + input.keyY * 0.1;
   } else if (input.ptrOn) {
     // スワイプ or 絶対位置（キー補助）
     targetX = input.ptrX + input.keyX * 0.15;
@@ -3973,16 +4160,20 @@ async function requestGyroPermission() {
 
 /** 操作モードを切替え：UI表示・ガイドテキスト・Dパッドを同期する */
 function applyControlMode() {
-  const dpadEl   = document.getElementById('dpad');
-  const guideEl  = document.getElementById('guide');
-  // Dパッド表示切替
+  const dpadEl     = document.getElementById('dpad');
+  const joystickEl = document.getElementById('joystick');
+  const guideEl    = document.getElementById('guide');
+  // Dパッド / ジョイスティック 表示切替
   dpadEl.style.display = controlMode === 'dpad' ? 'grid' : 'none';
+  if (joystickEl) joystickEl.style.display = controlMode === 'joystick' ? 'block' : 'none';
   // ガイドテキスト更新
   const kbdHint = '<kbd>↑↓←→</kbd> キー &nbsp;|&nbsp; <kbd>R</kbd>：リスタート';
   if (controlMode === 'swipe') {
     guideEl.innerHTML = '👆 ドラッグで操作 &nbsp;|&nbsp; ' + kbdHint;
   } else if (controlMode === 'dpad') {
     guideEl.innerHTML = '🕹 Dパッドで操作 &nbsp;|&nbsp; ' + kbdHint;
+  } else if (controlMode === 'joystick') {
+    guideEl.innerHTML = '🔘 360°パッドで操作 &nbsp;|&nbsp; ' + kbdHint;
   } else {
     guideEl.innerHTML = '📱 ジャイロで操作 &nbsp;|&nbsp; ' + kbdHint;
   }
@@ -3992,6 +4183,10 @@ function applyControlMode() {
   document.querySelectorAll('.cmo').forEach(el => {
     const v = el.querySelector('input[type=radio]').value;
     el.classList.toggle('selected', v === controlMode);
+  });
+  // ドロワー内 ctm-btn ハイライト同期
+  document.querySelectorAll('.ctm-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.mode === controlMode);
   });
 }
 
@@ -5311,6 +5506,7 @@ function getAudioCtx() {
  * @param {number} vol  - 音量
  */
 function playTone(freq, type, dur, vol) {
+  if (sfxVolume <= 0) return;
   try {
     const ac = getAudioCtx();
     const osc = ac.createOscillator();
@@ -5319,7 +5515,7 @@ function playTone(freq, type, dur, vol) {
     gain.connect(ac.destination);
     osc.type = type;
     osc.frequency.setValueAtTime(freq, ac.currentTime);
-    gain.gain.setValueAtTime(vol, ac.currentTime);
+    gain.gain.setValueAtTime(vol * sfxVolume, ac.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + dur);
     osc.start();
     osc.stop(ac.currentTime + dur);
@@ -5328,10 +5524,10 @@ function playTone(freq, type, dur, vol) {
 
 /** 壁衝突音（木製の鈍いコツン音） */
 function playBump(speed) {
-  if (Math.abs(speed) < 1.2) return;
+  if (Math.abs(speed) < 1.2 || sfxVolume <= 0) return;
   try {
     const ac = getAudioCtx();
-    const vol = Math.min(Math.abs(speed) / MAX_SPEED * 0.10, 0.08);
+    const vol = Math.min(Math.abs(speed) / MAX_SPEED * 0.10, 0.08) * sfxVolume;
     const osc = ac.createOscillator();
     const gain = ac.createGain();
     osc.connect(gain);
@@ -5348,6 +5544,7 @@ function playBump(speed) {
 
 /** 穴落下音（ヒュー↓と下降する笛音） */
 function playFall() {
+  if (sfxVolume <= 0) return;
   try {
     const ac = getAudioCtx();
     const osc = ac.createOscillator();
@@ -5357,7 +5554,7 @@ function playFall() {
     osc.type = 'sine';
     osc.frequency.setValueAtTime(520, ac.currentTime);
     osc.frequency.exponentialRampToValueAtTime(55, ac.currentTime + 0.85);
-    gain.gain.setValueAtTime(0.14, ac.currentTime);
+    gain.gain.setValueAtTime(0.14 * sfxVolume, ac.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.9);
     osc.start();
     osc.stop(ac.currentTime + 0.9);
@@ -5403,7 +5600,7 @@ function updateRollSound(spd) {
   if (!audioCtx) return;
   ensureRollSound();
   if (!rollGain) return;
-  const vol = spd > 0.4 ? Math.min(spd / MAX_SPEED * 0.052, 0.052) : 0;
+  const vol = spd > 0.4 ? Math.min(spd / MAX_SPEED * 0.052, 0.052) * sfxVolume : 0;
   rollGain.gain.setTargetAtTime(vol, audioCtx.currentTime, 0.06);
 }
 
@@ -5414,23 +5611,48 @@ function updateRollSound(spd) {
 /** ステージ選択ボタンを生成する（初期化時に1回だけ呼ぶ） */
 function createStageSelectUI() {
   const container = document.getElementById('stageSelect');
+  container.innerHTML = '';
   for (let i = 0; i < TOTAL_STAGES; i++) {
     const btn = document.createElement('button');
     btn.className = 'ctrl stage-btn';
     btn.textContent = i + 1;
     btn.dataset.stage = i;
-    btn.title = STAGE_DEFS[i].subtitle;
-    btn.addEventListener('click', () => {
-      loadStage(Number(btn.dataset.stage));
-    });
+    btn.title = STAGE_DEFS[i].name || STAGE_DEFS[i].subtitle || '';
+    const unlocked = isStageUnlocked(i);
+    if (!unlocked) {
+      btn.classList.add('locked');
+      btn.disabled = true;
+    } else if (clearedStages.has(i)) {
+      btn.classList.add('cleared');
+    }
+    if (unlocked) {
+      btn.addEventListener('click', () => {
+        loadStage(Number(btn.dataset.stage));
+        closeDrawer();
+      });
+    }
     container.appendChild(btn);
   }
 }
 
-/** ステージ選択ボタンのアクティブ状態を更新する */
+/** ステージ選択ボタンのアクティブ・クリア・ロック状態を更新する */
 function updateStageSelect() {
   document.querySelectorAll('.stage-btn').forEach(btn => {
-    btn.classList.toggle('active', Number(btn.dataset.stage) === runtime.stageIndex);
+    const i = Number(btn.dataset.stage);
+    const unlocked = isStageUnlocked(i);
+    // ロック解除：以前ロックされていたボタンが今回アンロックされた場合
+    if (unlocked && btn.disabled) {
+      btn.disabled = false;
+      btn.classList.remove('locked');
+      btn.addEventListener('click', () => {
+        loadStage(Number(btn.dataset.stage));
+        closeDrawer();
+      });
+    }
+    btn.classList.toggle('active', i === runtime.stageIndex);
+    if (!btn.disabled) {
+      btn.classList.toggle('cleared', clearedStages.has(i) && i !== runtime.stageIndex);
+    }
   });
 }
 
@@ -5624,6 +5846,8 @@ function updatePlaying(deltaMs) {
     showClearOverlay(stars, sec);
     nextBtn.disabled = false;
     playGoal();
+    markStageCleared(runtime.stageIndex);
+    updateStageSelect();
   }
 }
 
@@ -5803,6 +6027,11 @@ function runUnitTests() {
 // ══════════════════════════════════════════════════════════════════
 
 /** イベントリスナーを登録する */
+/** ドロワーを閉じる */
+function closeDrawer() {
+  document.getElementById('drawerOverlay').classList.remove('show');
+}
+
 function registerEvents() {
   // キーボード
   window.addEventListener('keydown', onKeyDown);
@@ -5956,6 +6185,165 @@ function registerEvents() {
       }
     }
   });
+
+  // ─── ハンバーガーメニュー・ドロワー ───
+  const menuBtn       = document.getElementById('menuBtn');
+  const drawerOverlay = document.getElementById('drawerOverlay');
+  const drawerClose   = document.getElementById('drawerClose');
+
+  menuBtn.addEventListener('click', () => {
+    applyControlMode(); // ctm-btn ハイライトを現在モードに同期
+    drawerOverlay.classList.add('show');
+  });
+  drawerClose.addEventListener('click', closeDrawer);
+  drawerOverlay.addEventListener('click', (e) => {
+    if (e.target === drawerOverlay) closeDrawer();
+  });
+
+  // ─── ドロワー内：操作モード切替ボタン ───
+  document.querySelectorAll('.ctm-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const newMode = btn.dataset.mode;
+      if (newMode === 'gyro') {
+        if (!input.gyroActive) {
+          const ok = await requestGyroPermission();
+          if (!ok) {
+            controlMode = 'swipe';
+            setMessage('ジャイロが使用できないためスワイプモードにしました');
+          } else {
+            controlMode = 'gyro';
+            setMessage('ジャイロモード：端末を傾けて操作します');
+          }
+        } else {
+          controlMode = 'gyro';
+        }
+      } else {
+        if (input.gyroActive && newMode !== 'gyro') {
+          input.gyroActive = false;
+          input.gyroX = 0;
+          input.gyroY = 0;
+        }
+        controlMode = newMode;
+        if (newMode === 'swipe')    setMessage('スワイプモード：画面をドラッグして操作します');
+        if (newMode === 'dpad')     setMessage('Dパッドモード：十字ボタンで操作します');
+        if (newMode === 'joystick') setMessage('360°パッドモード：アナログスティックで操作します');
+      }
+      localStorage.setItem('controlMode', controlMode);
+      applyControlMode();
+      closeDrawer();
+    });
+  });
+
+  // ─── ドロワー内：感度スライダー（#sensSl2 ↔ 既存#sensSlider と連動） ───
+  const sensSl2 = document.getElementById('sensSl2');
+  const sensV2  = document.getElementById('sensV2');
+  if (sensSl2) {
+    sensSl2.value = sensitivity;
+    sensV2.textContent = sensitivity;
+    sensSl2.addEventListener('input', () => {
+      sensitivity = Number(sensSl2.value);
+      sensV2.textContent = sensSl2.value;
+      // 既存スライダーとも同期
+      if (sensSlider) { sensSlider.value = sensSl2.value; sensValEl.textContent = sensSl2.value; }
+    });
+    // 既存スライダーからも同期
+    if (sensSlider) {
+      sensSlider.addEventListener('input', () => {
+        sensSl2.value = sensSlider.value;
+        sensV2.textContent = sensSlider.value;
+      });
+    }
+  }
+
+  // ─── ドロワー内：SFX音量スライダー ───
+  const sfxSliderEl = document.getElementById('sfxSlider');
+  const sfxValEl2   = document.getElementById('sfxVal');
+  if (sfxSliderEl) {
+    sfxSliderEl.value = Math.round(sfxVolume * 10);
+    sfxValEl2.textContent = sfxSliderEl.value;
+    sfxSliderEl.addEventListener('input', () => {
+      sfxVolume = Number(sfxSliderEl.value) / 10;
+      sfxValEl2.textContent = sfxSliderEl.value;
+      localStorage.setItem('sfxVolume', sfxSliderEl.value);
+    });
+  }
+
+  // ─── ドロワー内：アクションボタン ───
+  document.getElementById('dwr-restart').addEventListener('click', () => {
+    closeDrawer();
+    restartStage();
+  });
+  document.getElementById('dwr-reset').addEventListener('click', () => {
+    if (!confirm('全ステージのクリア記録をリセットしてもよいですか？')) return;
+    clearedStages.clear();
+    localStorage.removeItem('clearedStages');
+    updateStageSelect();
+    closeDrawer();
+    loadStage(0);
+    setMessage('全リセット完了！ステージ1からスタートです。');
+  });
+
+  // ─── タイトル画面ボタン ───
+  document.getElementById('titleStartBtn').addEventListener('click', () => {
+    document.getElementById('titleScreen').classList.add('hidden');
+    loadStage(0);
+  });
+  document.getElementById('titleContBtn').addEventListener('click', () => {
+    const titleContBtn = document.getElementById('titleContBtn');
+    const idx = Number(titleContBtn.dataset.stageIndex || 0);
+    document.getElementById('titleScreen').classList.add('hidden');
+    loadStage(idx);
+  });
+
+  // ─── 360°アナログジョイスティック ───
+  const joystickBase = document.getElementById('joystickBase');
+  const joystickKnob = document.getElementById('joystickKnob');
+  const JOY_RADIUS = 36; // ノブの最大移動半径(px)
+  let joyTouchId = null;
+  let joyBaseRect = null;
+
+  function _joyRelease() {
+    input.joystickX = 0;
+    input.joystickY = 0;
+    joystickKnob.style.transform = 'translate(-50%, -50%)';
+    joystickKnob.classList.remove('active');
+    joyTouchId = null;
+  }
+
+  joystickBase.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    if (joyTouchId !== null) return;
+    const t = e.changedTouches[0];
+    joyTouchId = t.identifier;
+    joyBaseRect = joystickBase.getBoundingClientRect();
+    joystickKnob.classList.add('active');
+  }, { passive: false });
+
+  joystickBase.addEventListener('touchmove', (e) => {
+    e.preventDefault();
+    if (joyTouchId === null) return;
+    let touch = null;
+    for (let i = 0; i < e.changedTouches.length; i++) {
+      if (e.changedTouches[i].identifier === joyTouchId) { touch = e.changedTouches[i]; break; }
+    }
+    if (!touch) return;
+    if (!joyBaseRect) joyBaseRect = joystickBase.getBoundingClientRect();
+    const cx = joyBaseRect.left + joyBaseRect.width  / 2;
+    const cy = joyBaseRect.top  + joyBaseRect.height / 2;
+    let dx = touch.clientX - cx;
+    let dy = touch.clientY - cy;
+    const dist = Math.hypot(dx, dy);
+    if (dist > JOY_RADIUS) {
+      dx = dx / dist * JOY_RADIUS;
+      dy = dy / dist * JOY_RADIUS;
+    }
+    input.joystickX = dx / JOY_RADIUS;
+    input.joystickY = dy / JOY_RADIUS;
+    joystickKnob.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
+  }, { passive: false });
+
+  joystickBase.addEventListener('touchend',   (e) => { e.preventDefault(); _joyRelease(); }, { passive: false });
+  joystickBase.addEventListener('touchcancel',(e) => { e.preventDefault(); _joyRelease(); }, { passive: false });
 }
 
 /** ゲーム全体を初期化する */
@@ -5963,6 +6351,25 @@ function init() {
   createStageSelectUI();
   registerEvents();
   applyControlMode(); // 操作モードUIを初期化
+
+  // タイトル画面のセットアップ
+  const titleScreen   = document.getElementById('titleScreen');
+  const titleContBtn  = document.getElementById('titleContBtn');
+  // 続きから：最後にクリアした次のステージ（またはステージ0）を特定
+  let continueIdx = 0;
+  for (let i = TOTAL_STAGES - 1; i >= 0; i--) {
+    if (isStageUnlocked(i)) { continueIdx = i; break; }
+  }
+  if (continueIdx > 0) {
+    titleContBtn.style.display = '';
+    titleContBtn.textContent = `⏩ 続きから (Stage ${continueIdx + 1})`;
+    titleContBtn.dataset.stageIndex = continueIdx;
+  } else {
+    titleContBtn.style.display = 'none';
+  }
+  // タイトル画面を表示（ゲームはまだ開始しない）
+  titleScreen.classList.remove('hidden');
+  // ゲームループは先に起動しておく（描画が止まらないように）
   loadStage(0);
   requestAnimationFrame(gameLoop);
 }
