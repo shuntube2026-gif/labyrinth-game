@@ -3,9 +3,9 @@
     "relation": ["delegate_permission/common.handle_all_urls"],
     "target": {
       "namespace": "android_app",
-      "package_name": "com.yourname.labyrinthmarble",
+      "package_name": "com.shuntube.labyrinthmarble",
       "sha256_cert_fingerprints": [
-        "TODO: Replace with your Android App signing certificate SHA-256 fingerprint"
+        "2A:18:BC:2A:00:03:A4:ED:E4:B7:CB:60:CB:D1:99:4E:75:9B:76:0F:9E:94:BF:58:99:89:09:32:08:B8:38:81"
       ]
     }
   }
