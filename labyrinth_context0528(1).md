@@ -1,4 +1,4 @@
-# 木製ラビリンス迷宮バランスゲーム — 開発引き継ぎドキュメント
+# ラビリンスマーブル（Labyrinth Marble）— 開発引き継ぎドキュメント
 
 > このファイルと `index.html` をセットでClone/コピーすれば、
 > どのセッションでも開発を継続できます。
@@ -9,15 +9,17 @@
 
 | 項目 | 内容 |
 |------|------|
-| メインファイル | `index.html` (単一ファイル・約280KB) |
+| アプリ名 | **ラビリンスマーブル**（英語: Labyrinth Marble） |
+| メインファイル | `index.html` (単一ファイル・約300KB) |
 | 技術スタック | HTML5 Canvas 2D / 純粋JavaScript / CSSのみ（外部ライブラリ・CDN完全なし） |
 | 動作環境 | Chrome / Safari / Edge でダブルクリックするだけ。オフライン完全動作 |
 | 操作方法 | マウスドラッグ / スワイプ / Dパッド / 360°アナログジョイスティック / スマホジャイロ |
 | UI | タイトル画面・ハンバーガーメニュー（ドロワー）・ステージロックシステム |
 | PWA対応 | `manifest.json` / `sw.js` / `icons/` によりホーム画面インストール・オフライン起動が可能 |
-| リポジトリ | GitHub 管理（`index.html`, `manifest.json`, `sw.js`, `icons/`） |
+| Android対応 | TWA (Trusted Web Activity) で Google Play Store 公開予定 |
+| リポジトリ | GitHub 管理（GitHub Pages で公開） |
 
-**ゲーム内容：** 木製の迷宮盤をマウスで傾け、大理石ビー玉をスタートからゴールへ導く。穴に落ちたらリスタート。クリアタイムで☆1〜3を獲得。全33ステージ。
+**ゲーム内容：** 木製の迷宮盤を傾けて、銀のビー玉をスタートからゴールへ導く。穴に落ちたらリスタート。クリアタイムで☆1〜3を獲得。**全40ステージ。**
 
 ---
 
@@ -39,6 +41,7 @@
 §13. 穴描画 (drawHoles, drawSingleHole, drawMovingHoleIndicator)
 §14. HUD・UI更新 (updateHUD, updateStageSelect)
 §15. オーバーレイ・クリア演出
+§AdMob. 広告ブリッジ（onPlayEnd / window.AndroidAdMob / window.labyrinthSetBannerHeight）
 §16. 到達可能性チェック (checkReachability - BFS)
 §17. 単体テスト (runUnitTests - コンソールで呼び出し可)
 §18. 初期化 (registerEvents, createStageSelectUI, init, gameLoop)
@@ -88,7 +91,7 @@ EY1=66, EY2=143, EY3=220, EY4=297, EY5=374, EY6=451, EY7=528  // 回廊中心Y
 TL6=109, TR6=491  // ターン左右X
 
 // ステージ数
-TOTAL_STAGES = 33
+TOTAL_STAGES = 40
 ```
 
 ---
@@ -102,7 +105,7 @@ TOTAL_STAGES = 33
 | 5仕切り蛇行 | 1〜7, 11 | 左右蛇行の6回廊、通路幅78px |
 | 6仕切り蛇行 | 8〜10 | 左右蛇行の7回廊、通路幅65px |
 | 7×7格子迷路（通常床） | 12〜20 | 7列×7行の真の迷路、rails+holeで構成 |
-| 7×7格子迷路（氷床） | 21〜33 | ice物理、全ギミック混合、高難易度 |
+| 7×7格子迷路（氷床） | 21〜40 | ice物理、全ギミック混合、高難易度 |
 
 ### 全ステージ一覧
 
@@ -141,6 +144,7 @@ TOTAL_STAGES = 33
 | 31 | 覇王迷宮 | 25 | 全ギミック最大密度 |
 | 32 | 無双迷宮 | 26 | 全ギミック最大密度 |
 | **33** | **鬼神迷宮** | **27** | 全ギミック最大密度、最難関 |
+| 34〜40 | （高難易度続編） | 28〜 | 氷床+全ギミック統合、difficulty 28〜34 |
 
 ### ☆ 評価基準（各ステージのstarTimes参照）
 - ☆☆☆：`three`秒以内
@@ -172,7 +176,7 @@ const stubT6 = (n, h, x) => vr(C6_TOP[n], C6_TOP[n]+Math.min(h,38), x);
 const stubB6 = (n, h, x) => vr(C6_BOT[n]-Math.min(h,38), C6_BOT[n], x);
 ```
 
-### 7×7グリッド座標系（Stage 12〜33）
+### 7×7グリッド座標系（Stage 12〜40）
 
 ```
 グリッド: 7列(col 0-6) × 7行(row 0-6)
@@ -199,12 +203,6 @@ vr(y1, y2, x)  例: vr(34,110, 110) = row0の右辺（col0/col1境界の上セ�
 // vr(y1, y2, x)  ← 第1・2引数はY範囲、第3引数がX位置
 vr(34, 110, 110)   // = x=110の壁、y∈[34,110] = col0/col1境界のrow0区間
 vr(110, 186, 338)  // = x=338の壁、y∈[110,186] = col3/col4境界のrow1区間
-
-// よくある間違い: 「x=110の壁、y∈[110,186]」を書こうとして
-vr(110, 186, 110)  // ← これはx=110, y∈[110,186] で正しい
-// 「x=262の壁、y∈[262,338]」を書こうとして
-vr(262, 338, 262)  // ← これはx=262, y∈[262,338] で正しい
-// 引数の役割: vr(y_start, y_end, x_position)
 ```
 
 ### ギミックヘルパー一覧
@@ -213,7 +211,6 @@ vr(262, 338, 262)  // ← これはx=262, y∈[262,338] で正しい
 // 移動穴: 1軸サイン波移動
 const movingHole = (x0, y0, axis, range, speed, phase=0) =>
   ({ x0, y0, x:x0, y:y0, r:HOLE_R, axis, range, speed, phase, moving:true });
-// axis='x'|'y', range=振れ幅px, speed=cycles/秒, phase=初期位相(0-1)
 
 // 脈動穴: 固定位置で半径が脈動 (Stage 22〜)
 const pulsingHole = (x, y, minR, maxR, speed, phase=0) =>
@@ -229,7 +226,6 @@ const orbitHole = (cx, cy, orbitR, speed, phase=0) =>
 const freeHole = (x0, y0, rx, ry, speedX, speedY, phaseX=0, phaseY=0) =>
   ({ x0, y0, x:x0, y:y0, r:HOLE_R,
      rx, ry, speedX, speedY, phaseX, phaseY, moving:true, free:true });
-// rx/ry=振れ幅, speedX/speedY=各軸周期
 
 // バネバンパー: 当たると高反発で弾き返す障害物 (Stage 23〜, restitution=1.40)
 const springBumper = (x0, y0, axis, range, speed, phase=0) =>
@@ -238,94 +234,39 @@ const springBumper = (x0, y0, axis, range, speed, phase=0) =>
 // 加速パッド: 踏むと指定方向へ速度付与 (Stage 28〜, cooldown=0.5s)
 const boostPad = (x, y, dvx, dvy) =>
   ({ x, y, dvx, dvy, r:15, lastHit:-999 });
-// dvx/dvy=付与速度(px/frame)、magnitude 4 推奨（氷床friction=0.997に合わせ）
 ```
 
-### ステージデータ構造（7×7グリッド・高難易度タイプ）
+### AdMob 広告ブリッジ（Android TWA 向け）
 
 ```javascript
-{
-  id: 33, name: '鬼神迷宮', difficulty: 27,
-  starTimes: { three: 300, two: 480, one: 720 },
-  start: { x: 72, y: 72 },        // セル(0,0)の中心
-  goal:  { x: 528, y: 528 },      // セル(6,6)の中心
-  physics: { friction: 0.997, wallFriction: 0.97, ice: true },
-  rails: [ hr(...), vr(...), ... ],          // ← 必ずrails:（wallsは不可）
-  holes: [ holeAt(x,y), ... ],               // 静的穴
-  movingHoles: [                             // 全動的穴（orbit/free/pulsing含む）
-    orbitHole(...), freeHole(...), pulsingHole(...), movingHole(...),
-  ],
-  springBumpers: [ springBumper(...), ... ],
-  boostPads: [ boostPad(...), ... ],
-  guidePath: [ {x,y}, ... ],                 // 攻略ガイド用ウェイポイント（25点前後）
+// Android 側が window.AndroidAdMob を注入したときだけ動作
+// ブラウザ・PWA 環境ではノーオペ
+
+// バナー広告スペース制御（Android TWA → HTML 側 JS を呼び出す）
+window.labyrinthSetBannerHeight = function(px) {
+  document.getElementById('admob-banner-space').style.height = px + 'px';
+};
+
+// インタースティシャル広告カウンター
+let _adPlayEndCount = 0;
+function onPlayEnd() {
+  _adPlayEndCount++;
+  if (_adPlayEndCount < 5) return;
+  const bridge = window.AndroidAdMob;
+  if (!bridge) return;
+  const shown = bridge.showInterstitial();
+  if (shown) {
+    _adPlayEndCount = 0;
+    bridge.preloadInterstitial?.();
+  }
 }
-```
-
-### 物理ループ呼び出し順
-
-```javascript
-function updatePlaying() {
-  updatePhysics();         // 物理演算
-  updateMovingHoles();     // 移動穴位置更新
-  checkSpringBounce();     // バネバンパー衝突
-  checkBoostPads();        // 加速パッド踏み判定
-  checkHoleFall();         // 穴落下判定
-  checkGoal();             // ゴール判定
-}
-
-function updatePhysics() {
-  applyAcceleration();    // 傾き→加速（氷床時はfiction差を適用）
-  applyFriction();        // 摩擦
-  applyHolePull();        // 穴への吸引
-  applySpeedPanels();     // 加速/減速パネル効果
-  limitSpeed();           // MAX_SPEED制限
-  moveBall();             // 位置更新
-  resolveOuterWall();     // 外壁衝突
-  resolveAllRails();      // レール衝突（stage.railsを参照）
-}
-```
-
-### 穴落下判定（3層構造）
-
-```javascript
-// 1. 深部（hole.r × 0.65 以内）→ 速度問わず常に落下
-// 2. 縁（hole.r × 1.10 以内 かつ spd <= ESCAPE_SPD=4.5）→ ゆっくりなら落下
-// 3. Swept判定（spd >= 2.5のとき軌跡の中間点を最大6点チェック）→ 高速すり抜け防止
-// pull zone = hole.r × 2.2 以内 → HOLE_PULL=0.22 の吸引力
-```
-
-### ジャイロ操作
-
-```javascript
-// input オブジェクトのフィールド
-input.gyroX = 0;
-input.gyroY = 0;
-input.gyroActive = false;
-
-// DeviceOrientationEvent ハンドラ
-function onDeviceOrientation(e) {
-  const maxTilt = 22;
-  input.gyroX = clamp((e.gamma || 0) / maxTilt, -1, 1);
-  input.gyroY = clamp(((e.beta || 45) - 45) / maxTilt, -1, 1);
-}
-// integrateInput内の優先順位: ジャイロ > マウス/タッチ > キーボード
-```
-
-### 転がり音・サウンド
-
-```javascript
-// Web Audio APIによる手続き型サウンド（外部ファイル不要）
-// rollSrc: バンドパスフィルタ通したノイズ、速度連動でゲイン変化
-function updateRollSound(spd) {
-  const vol = spd > 0.4 ? Math.min(spd / MAX_SPEED * 0.052, 0.052) : 0;
-  rollGain.gain.setTargetAtTime(vol, audioCtx.currentTime, 0.06);
-}
-// 衝突音・落下音・ゴール音も実装済み
+// showFailOverlay() と showClearOverlay() の末尾で onPlayEnd() を呼ぶ
+// restartBtn のハンドラでは呼ばない（リスタート = プレイ終了ではない）
 ```
 
 ---
 
-## 6. 7×7格子迷路の壁設計ルール（Stage 12〜33 設計時必読）
+## 6. 7×7格子迷路の壁設計ルール（Stage 12〜40 設計時必読）
 
 ### 開口部と壁の関係
 
@@ -336,38 +277,26 @@ function updateRollSound(spd) {
 
 経路セグメント「row3を東に進む」→ vr壁が開口している必要がある
   (5,3)↔(6,3): vr(262,338, 490) が walls配列に含まれない → OPEN
-  ↑ 第3引数=490がx座標（col5/col6境界）, 第1・2引数=262,338がrow3のy範囲
 ```
 
 ### 壁設計チェックリスト
 
 1. **経路上の全接続を確認**: 各セグメントの開口壁がrailsに含まれていないことを確認
 2. **行き止まり・トラップを封鎖**: 経路外の接続はrailsに含まれているか確認
-3. **vr第3引数はx座標**: `vr(262,338, 490)` = x=490の壁, `vr(262,338, 262)` = x=262の壁
+3. **vr第3引数はx座標**: `vr(262,338, 490)` = x=490の壁
 4. **rails:キーを使う**: `walls:` は認識されない（エンジンは `stage.rails` を参照）
-5. **rails配列の整合性**: `runtime.stage.rails` がundefinedになるとゲームクラッシュ
-
-### トラップ穴配置ルール（7×7）
-
-| 罠の種類 | 配置場所 | 効果 |
-|----------|----------|------|
-| 行き過ぎ罠 | 経路端の1セル先 | 勢いよく進んだ時に落ちる |
-| 偽路罠 | 開口部の先の行き止まり | 間違ったルートへ誘導 |
-| 逆行罠 | 経路の逆方向 | 氷床でバックした時に落ちる |
 
 ---
 
 ## 7. 穴・柵の配置ルール（5仕切り/6仕切りレイアウト）
 
-新しいステージを作るときに守るべき制約：
-
 | ルール | 数値 |
 |--------|------|
-| 穴中心 → 柵の最近傍点 の距離 | **≥ 14px**（ビー玉が柵エッジで詰まらないため） |
+| 穴中心 → 柵の最近傍点 の距離 | **≥ 14px** |
 | 穴エッジ → 柵エッジ の通過幅 | **≥ 19px**（= 2 × BALL_R）|
 | 穴中心 → 外壁内面 の距離 | ≥ HOLE_R = 12px |
-| スタブ高さ（5仕切り） | ≤ 51px（最大）、実用は35px以下推奨 |
-| スタブ高さ（6仕切り） | ≤ 38px（最大）、実用は32px以下推奨 |
+| スタブ高さ（5仕切り） | ≤ 51px、実用は35px以下推奨 |
+| スタブ高さ（6仕切り） | ≤ 38px、実用は32px以下推奨 |
 | 移動穴のY軌跡（5仕切り） | 回廊内面 ± HOLE_R に収まること |
 
 ---
@@ -385,132 +314,108 @@ function updateRollSound(spd) {
 - **衝突・落下・ゴール音**：Web Audio API による手続き型サウンド
 - **大理石ビー玉**：`ball.rotation` ベースのベジェ曲線縞模様
 - **BRIOスタイル穴番号**：`drawSingleHole(hole, num)` に番号引数追加、金色テキスト表示
-- **ステージ選択UI**：`#stageSelect` コンテナ + `.stage-btn` CSS + `createStageSelectUI()` + `updateStageSelect()`
+- **ステージ選択UI**：`#stageSelect` コンテナ + `.stage-btn` CSS
 
-### 8-3. Stage 11〜12（蛇行+7×7格子）
-- Stage 11「揺れる奈落」：movingHole（1軸サイン波）初登場
-- Stage 12「BRIOラビリンス」：7×7グリッド本格迷路初登場、行き止まり穴14個
-
-### 8-4. Stage 13〜20（7×7格子・通常床）
-- 複雑な迷路設計（偽路・行き止まり多数）
-- movingHole密度の段階的増加
-- 加速・減速パネル組み合わせ
-
-### 8-5. Stage 21〜28（氷床・新ギミック追加）
-- **Stage 21**：氷床物理 `physics: { friction:0.997, wallFriction:0.97, ice:true }` 初登場
-- **Stage 22**：`pulsingHole` 追加（半径が脈動する穴）
-- **Stage 23**：`springBumper` 追加（高反発バンパー、restitution=1.40）
-- **Stage 25〜26**：`orbitHole` 多用（円軌道穴）
-- **Stage 27**：`freeHole`（リサジュー自由軌道穴）大量採用
-- **Stage 28**：`boostPad` 追加（方向付き速度パッド）
-
-### 8-6. Stage 29〜33（全ギミック統合・最高難易度）
-- 全ギミック（orbit×5, free×3, pulsing×3, spring×3, boostPad×5）を毎ステージ採用
-- starTimesは3星200→300秒（段階的に緩和）
-- 経路セグメント数：4→5→6→7→8と増加
+### 8-3 〜 8-6. Stage 11〜33（7×7格子・全ギミック統合）
+- Stage 11：movingHole初登場
+- Stage 12：7×7格子迷路初登場
+- Stage 21：氷床物理初登場
+- Stage 22：pulsingHole / Stage 23：springBumper / Stage 25〜：orbitHole
+- Stage 27：freeHole / Stage 28：boostPad
+- Stage 29〜33：全ギミック統合・最高難易度
 
 ### 8-7. バグ修正履歴
-- Stage 2, 9：穴-柵オーバーラップ修正（dist≥14px確保）
-- Stage 8 通過幅修正：穴座標調整
-- Stage 10 穴#11・#12：スタブ強制経路との衝突（クリア不可能）修正
-- Stage 27バグ：TOTAL_STAGES=27と定義していたがデータが26個 → Stage 27追加
-- Stage 33バグ（2026-05-28 全修正適用済み）：
-  - `walls:` → `rails:` キー修正（エンジンはstage.railsを参照 → ビー玉・ギミック未表示の原因）
-  - `vr(262,338, 490)` 削除（(5,3)↔(6,3)の縦壁が経路を封鎖していた）
-  - `hr(490,566, 338)`, `hr(490,566, 414)` 削除（col6 row3→row4→row5が封鎖 → ゴール到達不可の原因）
-  - `hr(338,414, 262)`, `hr(490,566, 262)` 追加（col4下方向・col6上部の未封鎖壁を補完）
+- Stage 2, 9：穴-柵オーバーラップ修正
+- Stage 10 穴#11・#12：クリア不可能バグ修正
+- Stage 33「鬼神迷宮」：`walls:` → `rails:` キー修正・封鎖壁の修正（2026-05-28）
 
 ### 8-8. UI大改修（2026-06-03）
 
-#### タイトルスクリーン（`#titleScreen`）
-- 起動時に木製テーマのフルスクリーンタイトル画面を表示（z-index:600）
+#### タイトルスクリーン（`#titleScreen`）— 全面リデザイン
+- 木製テーマのフルスクリーンタイトル画面（木目テクスチャ・金エンボス文字）
+- Canvas で迷路盤ミニプレビューをアニメーション描画（`drawTitlePreview()`）
 - **「▶ はじめから」**：ステージ1からスタート
-- **「⏩ 続きから (Stage X)」**：前回クリア済みの続きから（クリア記録がある場合のみ表示）
-- `titleScreen.classList.add('hidden')` でゲーム画面へ移行
+- **「⏩ 続きから (Stage X)」**：クリア記録がある場合のみ表示
+- `.ttl-wordmark`（"LABYRINTH"）+ `.ttl-wordmark-sub`（"MARBLE"）の2段表示
+- `.ttl-jp`：「ラビリンスマーブル」
+- `.ttl-tagline`：「MARBLE BALANCE GAME」
 
 #### ステージロック/アンロックシステム
 ```javascript
 const clearedStages = new Set(JSON.parse(localStorage.getItem('clearedStages') || '[]'));
-function markStageCleared(index) { ... } // ゴール到達時に呼ぶ
+function markStageCleared(index) { ... }
 function isStageUnlocked(index) { return index === 0 || clearedStages.has(index - 1); }
 ```
-- ドロワー内のステージボタン：未クリアは `.locked`（グレーアウト・disabled）
-- クリア済みは `.cleared`（緑グラデーション）
-- `updateStageSelect()` がクリア後に次ステージのロックを自動解除（`disabled = false` 付与）
 
 #### ハンバーガーメニュー・ドロワー（`#drawerOverlay` / `#drawer`）
-- 右下の **☰ボタン**（`#menuBtn`）でボトムシートを表示
-- `drawerOverlay.classList.add/remove('show')` でアニメーション付き開閉
-- `closeDrawer()` 関数でどこからでも閉じられる
-- ドロワー内コンテンツ：
-  - **ステージ選択**（`#stageSelect`）：ロック/クリア状態付きボタン
-  - **操作モード**（`.ctm-btn`）：スワイプ / Dパッド / 360° / ジャイロ、選択中は `.active`（緑）
-  - **感度スライダー**（`#sensSl2`）：既存の `#sensSlider` と双方向同期
-  - **効果音音量スライダー**（`#sfxSlider`）：`sfxVolume` をリアルタイム更新・localStorage保存
-  - **もう一度**（`#dwr-restart`）：現ステージリスタート後に閉じる
-  - **全リセット**（`#dwr-reset`）：confirm後 `clearedStages` クリア・ステージ1へ
+- HUDの **☰ボタン**（`#menuBtn`）でボトムシートを表示
+- ドロワー内コンテンツ：ステージ選択・操作モード・感度スライダー・SFX音量・リスタート・全リセット・**🏠 トップ画面に戻る**
 
-#### 360°アナログジョイスティック（`#joystick` / `#joystickBase` / `#joystickKnob`）
-```javascript
-input.joystickX = dx / JOY_RADIUS;  // -1〜1
-input.joystickY = dy / JOY_RADIUS;  // -1〜1
+#### 360°アナログジョイスティック
+- 操作モード「🔘 360°」選択時に `#controlArea` に表示
+- `input.joystickX / joystickY`（-1〜1）で入力
+
+#### Dパッド / ジョイスティックを `#controlArea` へ移動
+- canvas 外の下部に独立配置（盤面と重なりなし）
+
+### 8-9. Google Play / AdMob 対応（2026-06-04）
+
+#### タイトル変更
+- アプリ名を **「ラビリンスマーブル」**（Labyrinth Marble）に統一
+- `<title>`, `apple-mobile-web-app-title`, タイトル画面のすべてを更新
+
+#### AdMob 広告統合（HTML側）
+- `#admob-banner-space`：`#app` 最下部にバナー用スペース div（初期 height:0）
+- `window.labyrinthSetBannerHeight(px)`：Android TWA から呼んで余白を拡張
+- `onPlayEnd()` 関数：クリア/失敗後 5プレイ終了ごとにインタースティシャル要求
+  - リスタートはカウントしない
+  - 表示成功時にカウントリセット＋次の広告を事前読み込み
+  - `window.AndroidAdMob` が存在しない環境（ブラウザ・PWA）ではノーオペ
+
+#### sw.js v4（Network First 更新）
+- `index.html` は **Network First**（更新後に古いHTMLが残らない）
+- 失敗時はキャッシュにフォールバック（オフライン対応維持）
+- その他アセットは Cache First
+
+#### 新規ファイル追加
+- `privacy-policy.html`：AdMob・ジャイロセンサー・個人情報なしを明記
+- `.well-known/assetlinks.json`：TWA 用プレースホルダー（SHA-256 は後で設定）
+- `icons/maskable-512.png`：セーフゾーン80%・木色背景のマスカブルアイコン
+
+#### manifest.json 更新
+```json
+{
+  "name": "ラビリンスマーブル",
+  "short_name": "ラビリンスマーブル",
+  "description": "木製迷路盤を傾けて銀の玉をゴールへ導くラビリンス・バランスゲーム。全40ステージ。"
+}
 ```
-- 操作モード「🔘 360°」選択時のみ表示（`applyControlMode()` で show/hide）
-- `integrateInput()` にジョイスティックブランチを追加
-- タッチ識別子（`identifier`）追跡で多点タッチでも正確に動作
-- ノブは半径36pxにクランプ、離すと中央へ戻る
-
-#### 効果音音量（`sfxVolume`）統合
-- `playTone()`, `playBump()`, `playFall()`, `updateRollSound()` に `× sfxVolume` を組み込み
-- `sfxVolume <= 0` の場合は早期リターン（0除算を防ぐ）
-
-#### 旧UI非表示化
-- `#dbgBtn, #sensBox, #resetBtn, #settingsBtn, #gyroBtn { display:none!important }` でデバッグ・旧設定ボタン類を完全非表示
-- `#stageSelect` のデフォルト非表示、`#drawer #stageSelect` でドロワー内のみ表示
+- アイコン定義を `any` / `maskable` 別エントリに分離
 
 ---
 
 ## 9. 新ステージ設計テンプレート（高難易度氷床）
 
 ```javascript
-// ステージ34以降を追加する際のテンプレート
+// ステージ追加時のテンプレート
 {
-  id: 34, name: 'XXX', difficulty: 28,
+  id: 41, name: 'XXX', difficulty: 35,
   starTimes: { three: 320, two: 500, one: 750 },
-  start: { x: /*72か528*/, y: /*72か528*/ },
-  goal:  { x: /*528か72*/, y: /*528か72*/ },
+  start: { x: 72, y: 72 },
+  goal:  { x: 528, y: 528 },
   physics: { friction: 0.997, wallFriction: 0.97, ice: true },
-  rails: [
-    // 水平壁: y=110,186,262,338,414,490 の各行について
-    // 経路上の hr(col_x1, col_x2, y) を除外、残りをすべて列挙
-    // 垂直壁: x=110,186,262,338,414,490 の各列について
-    // 経路上の vr(row_y1, row_y2, x) を除外、残りをすべて列挙
-  ],
-  holes: [
-    // 静的トラップ穴 ×5
-    // 配置: 経路の行き過ぎ先・偽路の行き止まり
-    holeAt(x, y),
-  ],
+  rails: [ hr(...), vr(...), ... ],
+  holes: [ holeAt(x, y), ... ],
   movingHoles: [
-    // orbit×5, free×3, pulsing×3 が標準構成
     orbitHole(cx, cy, 34~38, 0.67~0.74, phase),
     freeHole(x0, y0, rx, ry, sx, sy, px, py),
     pulsingHole(x, y, 4, 26, 0.67~0.72, phase),
   ],
-  springBumpers: [
-    // ×3: 各コリドーで弾き返し
-    springBumper(x0, y0, 'x', 34, 0.48~0.53, phase),
-  ],
-  boostPads: [
-    // ×5: 各コリドーの進行方向に加速
-    boostPad(x, y, dvx, dvy),  // dvx/dvy ±4 が推奨
-  ],
-  guidePath: [
-    // 経路上のセル中心を順番に列挙（25点前後）
-    {x: start_x, y: start_y}, ..., {x: goal_x, y: goal_y},
-  ],
+  springBumpers: [ springBumper(x0, y0, 'x', 34, 0.48~0.53, phase) ],
+  boostPads: [ boostPad(x, y, dvx, dvy) ],
+  guidePath: [ {x, y}, ... ],
 },
-// TOTAL_STAGES の値も +1 すること（line ~372）
+// TOTAL_STAGES の値も +1 すること
 ```
 
 ---
@@ -518,28 +423,31 @@ input.joystickY = dy / JOY_RADIUS;  // -1〜1
 ## 10. 動作確認チェックリスト
 
 ### 基本動作
-- [ ] ブラウザで開いてタイトル画面が表示される
-- [ ] 「▶ はじめから」でゲーム開始、ビー玉がスワイプで動く
+- [ ] ブラウザで開いてタイトル画面（ラビリンスマーブル）が表示される
+- [ ] 「▶ はじめから」でゲーム開始、ビー玉が動く
 - [ ] 穴に落ちるとリスタート演出が出る
-- [ ] ゴールに入るとクリア画面が出る・次のステージのロックが解除される
+- [ ] ゴールに入るとクリア画面が出る・次ステージのロックが解除される
 
-### 新UI
-- [ ] 右下の **☰ボタン** でドロワーが開く
+### UI
+- [ ] HUD右の ☰ボタン でドロワーが開く
 - [ ] ドロワー内でステージ選択できる（クリア済みは緑、未クリアはグレー）
-- [ ] 「🔘 360°」を選ぶと左下にジョイスティックが表示され、タッチで操作できる
-- [ ] 「🕹 Dパッド」を選ぶと十字キーが左下に表示される
-- [ ] 感度スライダーと効果音スライダーが機能する（効果音量0で無音になる）
-- [ ] 「全リセット」でステージロックが1に戻る
-- [ ] ブラウザ再起動後もクリア済みステージが保持されている（localStorage）
-- [ ] クリア記録がある場合「⏩ 続きから」ボタンがタイトルに表示される
+- [ ] 「🔘 360°」でジョイスティックが下部に表示され操作できる
+- [ ] 「🕹 Dパッド」で十字キーが下部に表示される
+- [ ] 「🏠 トップ画面に戻る」でタイトル画面に戻れる
+- [ ] 効果音スライダー0で無音になる
+
+### PWA / Android
+- [ ] GitHub Pages の HTTPS URL でアクセスできる
+- [ ] ブラウザの「ホーム画面に追加」でインストールできる
+- [ ] オフライン起動が機能する（sw.js v4）
+- [ ] `privacy-policy.html` にアクセスできる
+- [ ] `.well-known/assetlinks.json` にアクセスできる（TWA 検証用）
 
 ### ステージ動作
 - [ ] Stage 21 以降で氷の表面描画・滑り物理が動作する
 - [ ] Stage 22 以降で脈動する穴が動いている
-- [ ] Stage 23 以降でバネバンパーが弾き返す
-- [ ] Stage 28 以降で加速パッド（橙色矢印）に乗ると加速する
-- [ ] Stage 33「鬼神迷宮」でスタート(左上)→ゴール(右下)まで到達可能
-- [ ] ブラウザコンソールで `runUnitTests()` を実行 → PASS が出る
+- [ ] Stage 33「鬼神迷宮」でゴールまで到達可能
+- [ ] ブラウザコンソールで `runUnitTests()` → PASS が出る
 
 ---
 
@@ -550,40 +458,40 @@ input.joystickY = dy / JOY_RADIUS;  // -1〜1
 3. 新しいチャットで **このドキュメントをアップロード** してから以下を伝える：
 
 ```
-木製ラビリンスバランスゲームの開発を続けたいです。
-添付のlabyrinth_context.mdが引き継ぎドキュメントです。
-index.htmlが現在のゲームファイル（Stage 33まで実装済み・PWA対応済み）です。
+ラビリンスマーブルの開発を続けたいです。
+添付の labyrinth_context*.md が引き継ぎドキュメントです。
+index.html が現在のゲームファイル（全40ステージ実装済み・PWA+Google Play対応済み）です。
 内容を把握した上で、[やりたいこと] をお願いします。
 ```
 
-4. あとは普通に修正をお願いするだけでOK。
-
-> **遊ぶだけなら** `index.html` をブラウザでダブルクリックするだけ。
-> **スマホでホーム画面に追加するなら** GitHub Pages 等で HTTPS 公開後、ブラウザの「ホーム画面に追加」を使う。
-
 ---
 
-## 12. PWA 設定（2026-05-28 追加）
+## 12. PWA 設定（2026-06-04 更新）
 
 ### プロジェクトファイル構成
 
 ```
 labyrinth-game/
-├── index.html          # メインゲームファイル（HTML+CSS+JS 全込み）
-├── manifest.json       # PWA マニフェスト
-├── sw.js               # Service Worker（オフラインキャッシュ）
+├── index.html              # メインゲームファイル（HTML+CSS+JS 全込み）
+├── manifest.json           # PWA マニフェスト（ラビリンスマーブル）
+├── sw.js                   # Service Worker v4（index.html: Network First）
+├── privacy-policy.html     # プライバシーポリシー（AdMob・ジャイロ対応）
+├── README.md               # Google Play / TWA / AdMob 情報込み
 ├── icons/
-│   ├── icon-192.png    # PWA アイコン 192×192（木材背景＋迷路柄）
-│   └── icon-512.png    # PWA アイコン 512×512（同上）
-└── labyrinth_context*.md  # 本ドキュメント
+│   ├── icon-192.png        # PWA アイコン 192px
+│   ├── icon-512.png        # PWA アイコン 512px
+│   └── maskable-512.png    # マスカブルアイコン 512px（セーフゾーン80%）
+└── .well-known/
+    └── assetlinks.json     # TWA 用デジタルアセットリンク（SHA-256 要設定）
 ```
 
-### manifest.json 主要設定
+### manifest.json 現在の設定
 
 ```json
 {
-  "name": "木製ラビリンス迷宮バランスゲーム",
-  "short_name": "ラビリンス",
+  "name": "ラビリンスマーブル",
+  "short_name": "ラビリンスマーブル",
+  "description": "木製迷路盤を傾けて銀の玉をゴールへ導くラビリンス・バランスゲーム。全40ステージ。",
   "start_url": "./index.html",
   "display": "standalone",
   "orientation": "portrait-primary",
@@ -592,7 +500,15 @@ labyrinth-game/
 }
 ```
 
-### index.html の PWA 関連 head タグ（確認済み）
+### sw.js v4 キャッシュ戦略
+
+```javascript
+const CACHE = 'labyrinth-v4';
+// index.html: Network First（更新を即反映・失敗時はキャッシュ）
+// manifest.json / icons / privacy-policy.html: Cache First（オフライン対応）
+```
+
+### index.html の PWA 関連 head タグ
 
 ```html
 <link rel="manifest" href="manifest.json">
@@ -600,102 +516,82 @@ labyrinth-game/
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="ラビリンス">
+<meta name="apple-mobile-web-app-title" content="ラビリンスマーブル">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 ```
 
-### sw.js キャッシュ対象
+---
 
-```javascript
-const CACHE = 'labyrinth-v3';  // UI大改修(2026-06-03)でv3に更新
-const FILES = [
-  './',
-  './index.html',
-  './manifest.json',
-  './icons/icon-192.png',
-  './icons/icon-512.png',
-];
+## 13. Google Play Store 公開方針（2026-06-04 追加）
+
+### 公開方式
+PWA を **Trusted Web Activity (TWA)** で包み、`.aab` として Google Play に提出する。
+
+### Android プロジェクト（`labyrinth-game-android/`）
+
+```
+labyrinth-game-android/
+├── twa-manifest.json     # Bubblewrap 設定（packageId・host・startUrl 等）
+├── store-listing.md      # ストア掲載文（JP/EN・Data safety・Content rating）
+└── BUILD_GUIDE.md        # ビルド手順書（Bubblewrap→Keystore→.aab→Play Console）
 ```
 
-### アイコン再生成方法（Python 標準ライブラリのみ）
+### twa-manifest.json 主要設定
 
-icons/ フォルダを削除してしまった場合は以下のスクリプトで再生成可能：
-
-```bash
-cd <リポジトリルート>
-python3 - << 'EOF'
-import struct, zlib, os
-
-def make_png(w, h, pixels):
-    def chunk(t, d):
-        c = t + d
-        return struct.pack('>I', len(d)) + c + struct.pack('>I', zlib.crc32(c) & 0xffffffff)
-    raw = b''.join(b'\x00' + bytes([v for px in row for v in px]) for row in pixels)
-    return (b'\x89PNG\r\n\x1a\n'
-            + chunk(b'IHDR', struct.pack('>IIBBBBB', w, h, 8, 2, 0, 0, 0))
-            + chunk(b'IDAT', zlib.compress(raw, 9))
-            + chunk(b'IEND', b''))
-
-def draw_icon(size):
-    BG=(212,176,106); FRAME=(92,46,14); WALL=(140,90,35)
-    BALL=(225,225,235); SHINE=(255,255,255); GOAL=(34,160,34)
-    px = [[BG]*size for _ in range(size)]
-    def rect(x1,y1,x2,y2,c):
-        for y in range(max(0,y1),min(size,y2)):
-            for x in range(max(0,x1),min(size,x2)): px[y][x]=c
-    def circle(cx,cy,r,c,ic=None,ir=0):
-        for y in range(max(0,cy-r),min(size,cy+r+1)):
-            for x in range(max(0,cx-r),min(size,cx+r+1)):
-                d2=(x-cx)**2+(y-cy)**2
-                if d2<=r*r: px[y][x]=(ic if ic and d2<=ir*ir else c)
-    s=size; b=max(6,s*6//100); wt=max(3,s*4//100); m=max(10,s*16//100)
-    rect(0,0,s,b,FRAME); rect(0,s-b,s,s,FRAME)
-    rect(0,0,b,s,FRAME); rect(s-b,0,s,s,FRAME)
-    rect(b+m,s//2-wt//2,s//2+m,s//2+wt//2+1,WALL)
-    rect(s//2+m-wt//2,b+m,s//2+m+wt//2+1,s//2+m,WALL)
-    rect(s//2-m,s//2+m-wt//2,s-b-m,s//2+m+wt//2+1,WALL)
-    rect(s//2-m-wt//2,s//2-m,s//2-m+wt//2+1,s-b-m,WALL)
-    br=max(5,s*8//100); bx=b+m+br+max(2,s//40); by=b+m+br+max(2,s//40)
-    circle(bx,by,br,BALL,SHINE,max(1,br//3))
-    gr=max(5,s*9//100); gx=s-b-m-gr-max(2,s//40); gy=s-b-m-gr-max(2,s//40)
-    circle(gx,gy,gr,GOAL); circle(gx-gr//4,gy-gr//4,max(1,gr//4),(180,220,180))
-    return px
-
-os.makedirs('icons', exist_ok=True)
-for size in [192, 512]:
-    with open(f'icons/icon-{size}.png', 'wb') as f:
-        f.write(make_png(size, size, draw_icon(size)))
-    print(f'Created icons/icon-{size}.png')
-EOF
+```json
+{
+  "packageId": "com.shuntube.labyrinthmarble",
+  "host": "shuntube2026-gif.github.io",
+  "name": "ラビリンスマーブル",
+  "startUrl": "/labyrinth-game/index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "themeColor": "#5c2e0e",
+  "backgroundColor": "#d4b06a",
+  "minSdkVersion": 23,
+  "targetSdkVersion": 35
+}
 ```
 
-### PWA インストール要件チェックリスト
+### AdMob 設定（Android 側 作業リスト）
 
-- [ ] HTTPS でホスティングされている（GitHub Pages / Vercel / Netlify 等）
-- [x] `manifest.json` が正しく読み込まれている
-- [x] Service Worker (`sw.js`) が登録されている
-- [x] 192×192 以上の PNG アイコンが存在する
-- [x] `start_url` がアクセス可能なパスになっている
+| 作業 | 状態 |
+|---|---|
+| HTML 側バナースペース (`#admob-banner-space`) | ✅ 実装済み |
+| HTML 側 JS ブリッジ (`window.AndroidAdMob`) | ✅ 実装済み |
+| インタースティシャルカウンター (`onPlayEnd()`) | ✅ 実装済み |
+| AdMob アプリ・広告ユニット作成 | ⬜ 要手動 |
+| AndroidManifest.xml への APP_ID 追記 | ⬜ Claudeが追記可能 |
+| Activity への JavascriptInterface 実装 | ⬜ 要手動 or 詳細後述 |
+
+### 残り作業（手動が必要）
+
+1. JDK 17 + Android Studio インストール
+2. `bubblewrap update`（`labyrinth-game-android/` で実行）
+3. Keystore（署名鍵）作成 → SHA-256 を `.well-known/assetlinks.json` に反映
+4. `bubblewrap build` → `.aab` 生成
+5. AdMob でアプリ・広告ユニット作成
+6. AndroidManifest.xml に APP_ID 追記（Claude が対応可）
+7. Play Console でストア情報・スクリーンショット・Data safety 登録
 
 ---
 
-## 13. 今後のアイデア（未実装）
+## 14. 今後のアイデア（未実装）
 
-- [ ] **Stage 34〜**: さらに高難易度ステージ（difficulty 28+）
 - [ ] **BGM**：Web Audio API で環境音（木のきしみ・環境SEなど）
-- [ ] **PWAアイコン差し替え**：本物の木製ラビリンスボードの写真への変更（ファイルパス提供待ち）
 - [ ] **移動する壁**：往復する柵ギミックのステージ
-- [ ] **タイムアタックモード**：全ステージ通しのタイム計測・ランキング
+- [ ] **タイムアタックモード**：全ステージ通しのタイム計測
 - [ ] **リプレイ保存**：クリア後に軌跡を再生
-- [ ] **難易度選択**：簡単/普通/難しいで穴サイズや摩擦を変える
 - [ ] **本物BRIO配置ステージ**：83穴番号順の本家マップ再現
-- [x] ~~モバイル最適化：タッチ操作の感度チューニング~~ → ドロワー内スライダーで実装済み
+- [x] ~~モバイル最適化~~ → ドロワー内スライダーで実装済み
 - [x] ~~デバッグ非表示~~ → CSS `display:none!important` で実装済み
 - [x] ~~360°バーチャルパッド~~ → アナログジョイスティック実装済み
 - [x] ~~ハンバーガーメニュー~~ → ドロワーUI実装済み
-- [x] ~~タイトル/スタート画面~~ → 実装済み
+- [x] ~~タイトル/スタート画面~~ → 木製テーマフルリデザイン済み
 - [x] ~~ステージロックシステム~~ → localStorage永続化で実装済み
+- [x] ~~PWAアイコン差し替え~~ → 実際の木製ボード写真アイコン実装済み
+- [x] ~~Google Play 対応~~ → TWA 方針・AdMob統合・privacy-policy.html 実装済み
 
 ---
 
-*最終更新: 2026-06-03 / 担当AI: Claude (Claude Code) / 対応バージョン: Stage 33まで（全ステージ動作確認済み・PWA対応済み・UI大改修済み）*
+*最終更新: 2026-06-04 / 担当AI: Claude (Claude Code) / 対応バージョン: Stage 40まで（全ステージ動作確認済み・PWA v4・Google Play 対応済み・ラビリンスマーブルにタイトル変更済み）*
