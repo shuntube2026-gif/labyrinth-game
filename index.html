@@ -522,25 +522,254 @@ kbd{
   border:1.5px solid rgba(245,210,115,.3)!important;
   color:rgba(255,242,205,.82);
   box-shadow:0 2px 14px rgba(0,0,0,.18);
-  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  margin-bottom:10px}
+.ttl-btn-select{
+  padding:13px;font-size:15px;
+  background:rgba(180,110,30,.28);
+  border:1.5px solid rgba(245,185,70,.32)!important;
+  color:rgba(255,228,160,.9);
+  box-shadow:0 2px 14px rgba(0,0,0,.22);
+  margin-bottom:10px}
+.ttl-btn-howto{
+  padding:11px;font-size:13px;
+  background:transparent;
+  border:1.5px solid rgba(245,210,115,.18)!important;
+  color:rgba(255,242,205,.58);
+  box-shadow:none}
+
+/* ── タイトルステージ選択スクリーン ── */
+#titleStageSelectScreen{
+  position:fixed;inset:0;z-index:700;overflow-y:auto;
+  display:flex;flex-direction:column;align-items:center;
+  padding:40px 20px 52px;
+  background:
+    repeating-linear-gradient(89deg,transparent 0,transparent 9px,rgba(255,200,110,.018) 9px,rgba(255,200,110,.018) 10px),
+    repeating-linear-gradient(91deg,transparent 0,transparent 22px,rgba(0,0,0,.015) 22px,rgba(0,0,0,.015) 23px),
+    radial-gradient(ellipse 150% 110% at 50% -5%,#dc8838 0%,#8a4012 42%,#3c1806 100%);
+  -webkit-overflow-scrolling:touch}
+#titleStageSelectScreen.hidden{display:none}
+.ttl-ss-head{font-size:20px;font-weight:900;letter-spacing:4px;
+  color:rgba(245,210,110,.92);text-shadow:0 2px 8px rgba(0,0,0,.55);
+  margin-bottom:4px}
+.ttl-ss-sub{font-size:11px;color:rgba(255,220,150,.55);letter-spacing:1.5px;
+  margin-bottom:28px}
+.ttl-ss-grid{
+  display:grid;grid-template-columns:repeat(5,1fr);gap:9px;
+  width:100%;max-width:310px;margin-bottom:28px}
+.ttl-ss-btn{
+  aspect-ratio:1;border-radius:11px;border:none;
+  font-family:inherit;font-size:13px;font-weight:800;cursor:pointer;
+  transition:transform .1s,filter .1s;
+  background:linear-gradient(145deg,#d6a85a,#8c5018);
+  color:rgba(255,235,175,.9);
+  box-shadow:0 2px 7px rgba(0,0,0,.38),inset 0 1px 0 rgba(255,255,255,.15)}
+.ttl-ss-btn.cleared{
+  background:linear-gradient(145deg,#7cca80,#2d8038);
+  color:#fff;box-shadow:0 2px 7px rgba(0,0,0,.38),inset 0 1px 0 rgba(255,255,255,.2)}
+.ttl-ss-btn.locked{
+  opacity:.28;cursor:not-allowed;
+  background:linear-gradient(145deg,#b0a090,#7a6858);
+  color:rgba(255,255,255,.25)}
+.ttl-ss-btn:not(.locked):hover{filter:brightness(1.1)}
+.ttl-ss-btn:not(.locked):active{transform:scale(.91)}
+.ttl-ss-close{
+  padding:12px 40px;border-radius:14px;border:none;cursor:pointer;
+  background:rgba(255,240,200,.1);
+  border:1.5px solid rgba(245,210,115,.22)!important;
+  color:rgba(255,242,205,.68);
+  font-family:inherit;font-size:13px;font-weight:700;letter-spacing:1px}
+
+/* ── 遊び方スクリーン ── */
+#titleHowToPlayScreen{
+  position:fixed;inset:0;z-index:700;overflow-y:auto;
+  display:flex;flex-direction:column;align-items:center;
+  padding:40px 18px 56px;
+  background:
+    repeating-linear-gradient(89deg,transparent 0,transparent 9px,rgba(255,200,110,.018) 9px,rgba(255,200,110,.018) 10px),
+    repeating-linear-gradient(91deg,transparent 0,transparent 22px,rgba(0,0,0,.015) 22px,rgba(0,0,0,.015) 23px),
+    radial-gradient(ellipse 150% 110% at 50% -5%,#dc8838 0%,#8a4012 42%,#3c1806 100%);
+  -webkit-overflow-scrolling:touch}
+#titleHowToPlayScreen.hidden{display:none}
+.htp-head{font-size:20px;font-weight:900;letter-spacing:4px;
+  color:rgba(245,210,110,.92);text-shadow:0 2px 8px rgba(0,0,0,.55);
+  margin-bottom:22px}
+.htp-card{
+  width:100%;max-width:320px;
+  background:rgba(0,0,0,.2);border-radius:16px;
+  padding:16px 18px;margin-bottom:14px;
+  border:1px solid rgba(245,210,115,.13)}
+.htp-card-ttl{
+  font-size:13.5px;font-weight:900;
+  color:rgba(245,205,100,.92);letter-spacing:.8px;
+  margin-bottom:10px;display:flex;align-items:center;gap:7px}
+.htp-card-body{font-size:12.5px;line-height:1.78;color:rgba(255,240,205,.82)}
+.htp-canvas-wrap{display:flex;justify-content:center;margin:6px 0 10px}
+.htp-canvas{border-radius:10px;box-shadow:0 3px 12px rgba(0,0,0,.45);display:block}
+.htp-ctrl-row{display:flex;align-items:flex-start;gap:10px;margin-bottom:9px}
+.htp-ctrl-icon{font-size:19px;flex-shrink:0;width:26px;text-align:center;padding-top:1px}
+.htp-ctrl-text{font-size:12px;line-height:1.65;color:rgba(255,238,200,.8)}
+.htp-ctrl-label{font-weight:800;color:rgba(245,210,100,.9)}
+.htp-tip{
+  margin-top:8px;padding:9px 12px;border-radius:9px;
+  background:rgba(255,210,100,.1);
+  font-size:11.5px;color:rgba(255,228,155,.82);line-height:1.7}
+.htp-stars{display:flex;flex-direction:column;gap:5px;margin:4px 0}
+.htp-star-row{display:flex;align-items:center;gap:8px;font-size:12px}
+.htp-star-row span:first-child{font-size:16px;width:56px;flex-shrink:0}
+.htp-close{
+  padding:12px 40px;border-radius:14px;border:none;cursor:pointer;
+  background:rgba(255,240,200,.1);
+  border:1.5px solid rgba(245,210,115,.22)!important;
+  color:rgba(255,242,205,.68);
+  font-family:inherit;font-size:13px;font-weight:700;letter-spacing:1px;
+  margin-top:6px}
 </style>
 </head>
 <body>
 <!-- ── タイトルスクリーン ── -->
 <div id="titleScreen">
   <div class="ttl-inner">
-    <!-- ミニ盤面プレビュー（JS で描画） -->
+    <!-- アプリアイコン -->
     <div class="ttl-preview-wrap">
-      <canvas id="titleCanvas" width="90" height="90" style="display:block;border-radius:14px"></canvas>
+      <img src="icons/icon-512.png"
+           style="width:100%;height:100%;border-radius:20px;display:block;object-fit:cover"
+           alt="ラビリンスマーブル">
     </div>
     <div class="ttl-tagline">MARBLE BALANCE GAME</div>
     <div class="ttl-wordmark">LABYRINTH</div>
     <div class="ttl-wordmark-sub">MARBLE</div>
     <div class="ttl-jp">ラビリンスマーブル</div>
     <div class="ttl-stages">全40ステージ</div>
+    <!-- 初回のみ表示 -->
     <button class="ttl-btn ttl-btn-start" id="titleStartBtn">▶ &nbsp;は じ め か ら</button>
-    <button class="ttl-btn ttl-btn-cont"  id="titleContBtn"  style="display:none">⏩ 続きから (Stage 1)</button>
+    <!-- Stage1クリア後に表示 -->
+    <button class="ttl-btn ttl-btn-cont"   id="titleContBtn"        style="display:none">⏩ 続きから (Stage 1)</button>
+    <button class="ttl-btn ttl-btn-select" id="titleStageSelectBtn" style="display:none">🎮 &nbsp;ス テ ー ジ 選 択</button>
+    <button class="ttl-btn ttl-btn-howto"  id="titleHowToPlayBtn"   style="display:none">❓ &nbsp;あ そ び か た</button>
   </div>
+</div>
+
+<!-- ── タイトル：ステージ選択スクリーン ── -->
+<div id="titleStageSelectScreen" class="hidden">
+  <div class="ttl-ss-head">STAGE SELECT</div>
+  <div class="ttl-ss-sub">クリア済みステージを選んで再挑戦</div>
+  <div class="ttl-ss-grid" id="titleStageGrid"></div>
+  <button class="ttl-ss-close" id="titleSSClose">← &nbsp;もどる</button>
+</div>
+
+<!-- ── タイトル：遊び方スクリーン ── -->
+<div id="titleHowToPlayScreen" class="hidden">
+  <div class="htp-head">あそびかた</div>
+
+  <!-- ゲームの目標 -->
+  <div class="htp-card">
+    <div class="htp-card-ttl">🎯 ゲームの目標</div>
+    <div class="htp-canvas-wrap">
+      <canvas id="htpCanvas1" width="284" height="110" class="htp-canvas"></canvas>
+    </div>
+    <div class="htp-card-body">
+      スタート（青い玉）からゴール（緑の輪）まで<br>
+      ビー玉を転がしてクリア！<br>
+      盤面を傾けてビー玉を操作します。
+    </div>
+  </div>
+
+  <!-- 穴に注意 -->
+  <div class="htp-card">
+    <div class="htp-card-ttl">🕳 穴に落ちたら失敗！</div>
+    <div class="htp-canvas-wrap">
+      <canvas id="htpCanvas2" width="284" height="100" class="htp-canvas"></canvas>
+    </div>
+    <div class="htp-card-body">
+      黒い穴に落ちるとその場でリスタート。<br>
+      動く穴・膨らむ穴・回転する穴など<br>
+      ステージが進むほど難しくなります。
+    </div>
+  </div>
+
+  <!-- タイム評価 -->
+  <div class="htp-card">
+    <div class="htp-card-ttl">⭐ クリアタイムで☆評価</div>
+    <div class="htp-card-body">
+      <div class="htp-stars">
+        <div class="htp-star-row"><span>⭐⭐⭐</span><span>超速クリア（ベストタイム以内）</span></div>
+        <div class="htp-star-row"><span>⭐⭐&nbsp;&nbsp;</span><span>速クリア</span></div>
+        <div class="htp-star-row"><span>⭐&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span>クリア（タイム制限なし）</span></div>
+      </div>
+      <div style="color:rgba(255,220,140,.55);font-size:11px;margin-top:6px">
+        ※ステージごとに基準タイムが異なります
+      </div>
+    </div>
+  </div>
+
+  <!-- 操作方法 -->
+  <div class="htp-card">
+    <div class="htp-card-ttl">🕹 操作方法</div>
+    <div class="htp-card-body">
+      <div class="htp-ctrl-row">
+        <div class="htp-ctrl-icon">👆</div>
+        <div class="htp-ctrl-text">
+          <span class="htp-ctrl-label">スワイプ / ドラッグ</span><br>
+          画面をドラッグして盤を傾ける
+        </div>
+      </div>
+      <div class="htp-ctrl-row">
+        <div class="htp-ctrl-icon">🕹</div>
+        <div class="htp-ctrl-text">
+          <span class="htp-ctrl-label">360°アナログスティック</span><br>
+          画面下のスティックで全方向に操作
+        </div>
+      </div>
+      <div class="htp-ctrl-row">
+        <div class="htp-ctrl-icon">🔼</div>
+        <div class="htp-ctrl-text">
+          <span class="htp-ctrl-label">Dパッド</span><br>
+          十字キーで上下左右に操作
+        </div>
+      </div>
+      <div class="htp-ctrl-row">
+        <div class="htp-ctrl-icon">📱</div>
+        <div class="htp-ctrl-text">
+          <span class="htp-ctrl-label">ジャイロ（スマホ専用）</span><br>
+          端末を実際に傾けて操作
+        </div>
+      </div>
+      <div class="htp-tip">
+        ☰ ゲーム中のメニューボタンから<br>
+        <strong>操作モードをいつでも変更できます</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- ギミックヒント -->
+  <div class="htp-card">
+    <div class="htp-card-ttl">💡 ステージのギミック</div>
+    <div class="htp-card-body">
+      <div class="htp-ctrl-row">
+        <div class="htp-ctrl-icon">🟥</div>
+        <div class="htp-ctrl-text"><span class="htp-ctrl-label">加速パネル</span> — 踏むと速度UP</div>
+      </div>
+      <div class="htp-ctrl-row">
+        <div class="htp-ctrl-icon">🟦</div>
+        <div class="htp-ctrl-text"><span class="htp-ctrl-label">減速パネル</span> — 踏むと速度DOWN</div>
+      </div>
+      <div class="htp-ctrl-row">
+        <div class="htp-ctrl-icon">🧊</div>
+        <div class="htp-ctrl-text"><span class="htp-ctrl-label">氷の床</span> — 滑りやすく止まりにくい</div>
+      </div>
+      <div class="htp-ctrl-row">
+        <div class="htp-ctrl-icon">🔵</div>
+        <div class="htp-ctrl-text"><span class="htp-ctrl-label">バネバンパー</span> — 当たると強く弾かれる</div>
+      </div>
+      <div class="htp-tip">
+        ☰ メニューの「リスタート」でいつでも<br>
+        同ステージをやり直せます
+      </div>
+    </div>
+  </div>
+
+  <button class="htp-close" id="titleHTPClose">← &nbsp;もどる</button>
 </div>
 <div id="app">
 
@@ -6168,6 +6397,182 @@ function closeDrawer() {
   document.getElementById('drawerOverlay').classList.remove('show');
 }
 
+// ══════════════════════════════════════════════════════════════════
+// タイトル画面 — ボタン切替 / ステージ選択 / 遊び方
+// ══════════════════════════════════════════════════════════════════
+
+/**
+ * タイトル画面のボタン表示を状態に応じて切り替える。
+ * ・初回 / Stage1未クリア → 「はじめから」のみ
+ * ・Stage1クリア済み      → 「続きから」「ステージ選択」「遊び方」
+ */
+function setupTitleButtons() {
+  const startBtn  = document.getElementById('titleStartBtn');
+  const contBtn   = document.getElementById('titleContBtn');
+  const selectBtn = document.getElementById('titleStageSelectBtn');
+  const htpBtn    = document.getElementById('titleHowToPlayBtn');
+
+  if (!clearedStages.has(0)) {
+    // 初回：はじめからのみ
+    startBtn.style.display  = '';
+    contBtn.style.display   = 'none';
+    selectBtn.style.display = 'none';
+    htpBtn.style.display    = 'none';
+  } else {
+    // Stage1クリア済み：3ボタン
+    startBtn.style.display = 'none';
+
+    // 続きから：最後のアンロック済みステージ（最後クリア+1）
+    let continueIdx = 0;
+    for (let i = TOTAL_STAGES - 1; i >= 0; i--) {
+      if (isStageUnlocked(i)) { continueIdx = i; break; }
+    }
+    contBtn.style.display      = '';
+    contBtn.textContent        = `⏩ 続きから (Stage ${continueIdx + 1})`;
+    contBtn.dataset.stageIndex = continueIdx;
+
+    selectBtn.style.display = '';
+    htpBtn.style.display    = '';
+  }
+}
+
+/** タイトルのステージ選択グリッドを生成する（開くたびに再生成） */
+function populateTitleStageGrid() {
+  const grid = document.getElementById('titleStageGrid');
+  grid.innerHTML = '';
+  for (let i = 0; i < TOTAL_STAGES; i++) {
+    const btn = document.createElement('button');
+    btn.className = 'ttl-ss-btn';
+    btn.textContent = i + 1;
+    btn.title = STAGE_DEFS[i] ? (STAGE_DEFS[i].name || '') : '';
+
+    // 選択可能：Stage1(i=0) または クリア済みステージ
+    const selectable = (i === 0) || clearedStages.has(i);
+    if (clearedStages.has(i)) btn.classList.add('cleared');
+    if (!selectable) {
+      btn.classList.add('locked');
+      btn.disabled = true;
+    } else {
+      btn.addEventListener('click', () => {
+        document.getElementById('titleStageSelectScreen').classList.add('hidden');
+        document.getElementById('titleScreen').classList.add('hidden');
+        loadStage(i);
+      });
+    }
+    grid.appendChild(btn);
+  }
+}
+
+/** 遊び方スクリーンの Canvas イラストを描画する */
+function drawHowToPlayCanvases() {
+  // ── Canvas1: ゲームの目標（スタート→ゴール）──
+  const c1 = document.getElementById('htpCanvas1');
+  if (c1) {
+    const ctx = c1.getContext('2d');
+    const W = c1.width, H = c1.height;
+    // 背景（木）
+    ctx.fillStyle = '#c8925a';
+    ctx.fillRect(0, 0, W, H);
+    // 木目
+    for (let y = 3; y < H; y += 6) {
+      ctx.fillStyle = `rgba(80,35,8,${0.04 + (y % 18 === 0 ? 0.04 : 0)})`;
+      ctx.fillRect(0, y, W, 2);
+    }
+    // 外枠
+    ctx.strokeStyle = '#4a1e06';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(2, 2, W - 4, H - 4);
+    // 経路（点線）
+    ctx.setLineDash([5, 4]);
+    ctx.strokeStyle = 'rgba(255,220,100,.55)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(40, H / 2);
+    ctx.lineTo(W - 40, H / 2);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    // 矢印
+    ctx.fillStyle = 'rgba(255,220,100,.55)';
+    ctx.beginPath();
+    const ax = W / 2 + 20, ay = H / 2;
+    ctx.moveTo(ax, ay - 6);
+    ctx.lineTo(ax + 12, ay);
+    ctx.lineTo(ax, ay + 6);
+    ctx.fill();
+    // スタート玉（青）
+    const bg = ctx.createRadialGradient(34, H/2-4, 2, 36, H/2, 13);
+    bg.addColorStop(0, '#b0e4f8'); bg.addColorStop(1, '#1468b0');
+    ctx.fillStyle = bg;
+    ctx.beginPath(); ctx.arc(38, H/2, 13, 0, Math.PI*2); ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,.3)'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.arc(38, H/2, 13, 0, Math.PI*2); ctx.stroke();
+    // スタートラベル
+    ctx.fillStyle = 'rgba(255,235,180,.85)';
+    ctx.font = 'bold 10px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('スタート', 38, H/2 + 28);
+    // ゴール（緑リング）
+    const gx = W - 38, gy = H / 2;
+    const goalGrad = ctx.createRadialGradient(gx, gy, 4, gx, gy, 16);
+    goalGrad.addColorStop(0, 'rgba(60,200,60,.35)');
+    goalGrad.addColorStop(1, 'rgba(30,120,30,.05)');
+    ctx.fillStyle = goalGrad;
+    ctx.beginPath(); ctx.arc(gx, gy, 16, 0, Math.PI*2); ctx.fill();
+    ctx.strokeStyle = '#50dd50'; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.arc(gx, gy, 16, 0, Math.PI*2); ctx.stroke();
+    ctx.fillStyle = '#50dd50';
+    ctx.beginPath(); ctx.arc(gx, gy, 6, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = 'rgba(255,235,180,.85)';
+    ctx.font = 'bold 10px sans-serif';
+    ctx.fillText('ゴール', gx, gy + 30);
+  }
+
+  // ── Canvas2: 穴に落ちたら失敗 ──
+  const c2 = document.getElementById('htpCanvas2');
+  if (c2) {
+    const ctx = c2.getContext('2d');
+    const W = c2.width, H = c2.height;
+    ctx.fillStyle = '#c8925a';
+    ctx.fillRect(0, 0, W, H);
+    for (let y = 3; y < H; y += 6) {
+      ctx.fillStyle = `rgba(80,35,8,${0.04 + (y % 18 === 0 ? 0.04 : 0)})`;
+      ctx.fillRect(0, y, W, 2);
+    }
+    ctx.strokeStyle = '#4a1e06';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(2, 2, W - 4, H - 4);
+    // 穴3つ
+    const holes = [[60, H/2 - 8], [142, H/2 + 6], [224, H/2 - 6]];
+    holes.forEach(([hx, hy]) => {
+      const hg = ctx.createRadialGradient(hx, hy, 0, hx, hy, 15);
+      hg.addColorStop(0, 'rgba(0,0,0,.95)');
+      hg.addColorStop(.65, 'rgba(0,0,0,.7)');
+      hg.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = hg;
+      ctx.beginPath(); ctx.arc(hx, hy, 15, 0, Math.PI*2); ctx.fill();
+    });
+    // 玉が2番目の穴に落ちかけている
+    const [bx, by] = [142, H/2 - 4];
+    ctx.save(); ctx.globalAlpha = 0.72;
+    const mbg = ctx.createRadialGradient(bx-3, by-4, 2, bx, by, 10);
+    mbg.addColorStop(0, '#d8d0c8'); mbg.addColorStop(1, '#707070');
+    ctx.fillStyle = mbg;
+    ctx.beginPath(); ctx.arc(bx, by, 10, 0, Math.PI*2); ctx.fill();
+    ctx.restore();
+    // ×マーク
+    ctx.strokeStyle = '#ff3838'; ctx.lineWidth = 2.5; ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(bx-8, by-22); ctx.lineTo(bx+8, by-10);
+    ctx.moveTo(bx+8, by-22); ctx.lineTo(bx-8, by-10);
+    ctx.stroke();
+    // ラベル
+    ctx.fillStyle = 'rgba(255,110,110,.9)';
+    ctx.font = 'bold 11px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('穴に落ちたらリスタート！', W/2, H - 8);
+  }
+}
+
 /** タイトル画面のミニ盤面プレビューを Canvas に描画する */
 function drawTitlePreview() {
   const c = document.getElementById('titleCanvas');
@@ -6483,21 +6888,8 @@ function registerEvents() {
   });
   document.getElementById('dwr-top').addEventListener('click', () => {
     closeDrawer();
-    // タイトル画面を再表示
-    const titleScreen  = document.getElementById('titleScreen');
-    const titleContBtn = document.getElementById('titleContBtn');
-    let continueIdx = 0;
-    for (let i = TOTAL_STAGES - 1; i >= 0; i--) {
-      if (isStageUnlocked(i)) { continueIdx = i; break; }
-    }
-    if (continueIdx > 0) {
-      titleContBtn.style.display = '';
-      titleContBtn.textContent = `⏩ 続きから (Stage ${continueIdx + 1})`;
-      titleContBtn.dataset.stageIndex = continueIdx;
-    } else {
-      titleContBtn.style.display = 'none';
-    }
-    titleScreen.classList.remove('hidden');
+    setupTitleButtons();
+    document.getElementById('titleScreen').classList.remove('hidden');
   });
 
   document.getElementById('dwr-reset').addEventListener('click', () => {
@@ -6516,10 +6908,29 @@ function registerEvents() {
     loadStage(0);
   });
   document.getElementById('titleContBtn').addEventListener('click', () => {
-    const titleContBtn = document.getElementById('titleContBtn');
-    const idx = Number(titleContBtn.dataset.stageIndex || 0);
+    const btn = document.getElementById('titleContBtn');
+    const idx = Number(btn.dataset.stageIndex || 0);
     document.getElementById('titleScreen').classList.add('hidden');
     loadStage(idx);
+  });
+
+  // ステージ選択ボタン
+  document.getElementById('titleStageSelectBtn').addEventListener('click', () => {
+    populateTitleStageGrid();
+    document.getElementById('titleStageSelectScreen').classList.remove('hidden');
+  });
+  document.getElementById('titleSSClose').addEventListener('click', () => {
+    document.getElementById('titleStageSelectScreen').classList.add('hidden');
+  });
+
+  // 遊び方ボタン
+  document.getElementById('titleHowToPlayBtn').addEventListener('click', () => {
+    document.getElementById('titleHowToPlayScreen').classList.remove('hidden');
+    document.getElementById('titleHowToPlayScreen').scrollTop = 0;
+    drawHowToPlayCanvases();
+  });
+  document.getElementById('titleHTPClose').addEventListener('click', () => {
+    document.getElementById('titleHowToPlayScreen').classList.add('hidden');
   });
 
   // ─── 360°アナログジョイスティック ───
@@ -6580,23 +6991,8 @@ function init() {
   applyControlMode(); // 操作モードUIを初期化
 
   // タイトル画面のセットアップ
-  const titleScreen   = document.getElementById('titleScreen');
-  const titleContBtn  = document.getElementById('titleContBtn');
-  // 続きから：最後にクリアした次のステージ（またはステージ0）を特定
-  let continueIdx = 0;
-  for (let i = TOTAL_STAGES - 1; i >= 0; i--) {
-    if (isStageUnlocked(i)) { continueIdx = i; break; }
-  }
-  if (continueIdx > 0) {
-    titleContBtn.style.display = '';
-    titleContBtn.textContent = `⏩ 続きから (Stage ${continueIdx + 1})`;
-    titleContBtn.dataset.stageIndex = continueIdx;
-  } else {
-    titleContBtn.style.display = 'none';
-  }
-  // タイトル画面を表示（ゲームはまだ開始しない）
-  titleScreen.classList.remove('hidden');
-  drawTitlePreview(); // ミニ盤面プレビューを描画
+  setupTitleButtons();
+  document.getElementById('titleScreen').classList.remove('hidden');
   // ゲームループは先に起動しておく（描画が止まらないように）
   loadStage(0);
   requestAnimationFrame(gameLoop);

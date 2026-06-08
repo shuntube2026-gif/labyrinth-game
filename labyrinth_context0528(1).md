@@ -366,7 +366,7 @@ function isStageUnlocked(index) { return index === 0 || clearedStages.has(index 
 
 #### AdMob 広告統合（HTML側）
 - `#admob-banner-space`：`#app` 最下部にバナー用スペース div（初期 height:0）
-- `window.labyrinthSetBannerHeight(px)`：Android TWA から呼んで余白を拡張
+- `window.labyrinthSetBannerHeight(px)`：Android から呼んで余白を拡張
 - `onPlayEnd()` 関数：クリア/失敗後 5プレイ終了ごとにインタースティシャル要求
   - リスタートはカウントしない
   - 表示成功時にカウントリセット＋次の広告を事前読み込み
@@ -379,7 +379,7 @@ function isStageUnlocked(index) { return index === 0 || clearedStages.has(index 
 
 #### 新規ファイル追加
 - `privacy-policy.html`：AdMob・ジャイロセンサー・個人情報なしを明記
-- `.well-known/assetlinks.json`：TWA 用プレースホルダー（SHA-256 は後で設定）
+- `.well-known/assetlinks.json`：TWA 用デジタルアセットリンク（SHA-256 設定済み）
 - `icons/maskable-512.png`：セーフゾーン80%・木色背景のマスカブルアイコン
 
 #### manifest.json 更新
@@ -391,6 +391,126 @@ function isStageUnlocked(index) { return index === 0 || clearedStages.has(index 
 }
 ```
 - アイコン定義を `any` / `maskable` 別エントリに分離
+
+---
+
+### 8-10. AdMob Android ネイティブ統合 ＋ 署名済み .aab ビルド（2026-06-05）
+
+#### アーキテクチャ変更：TWA → WebView
+
+**経緯：** TWA（Trusted Web Activity）は Chrome Custom Tab として別プロセスで動くため、
+`window.AndroidAdMob` のような JavaScript Interface が注入できない。
+WebView ベースに切り替えることで JS ブリッジが完全動作する。
+
+| 変更前 | 変更後 |
+|---|---|
+| `LauncherActivity` extends browser helper の `LauncherActivity` | `LauncherActivity` extends `android.app.Activity` |
+| Chrome Custom Tab で URL を開く | 内部 `WebView` でゲームを直接表示 |
+| JS ブリッジ不可 | `addJavascriptInterface(new AdMobBridge(), "AndroidAdMob")` で完全動作 |
+
+#### AdMob アカウント・広告ユニット（取得済み）
+
+| 項目 | ID |
+|---|---|
+| AdMob アプリ ID | `ca-app-pub-1169892231871820~3490280336` |
+| バナー広告ユニット ID | `ca-app-pub-1169892231871820/6412487377` |
+| インタースティシャル広告ユニット ID | `ca-app-pub-1169892231871820/5051304244` |
+
+#### Application.java の変更
+```java
+// MobileAds.initialize() でAdMob SDKを非同期初期化
+MobileAds.initialize(this, initializationStatus -> {});
+```
+
+#### LauncherActivity.java の変更（完全書き直し）
+
+```java
+// レイアウト: FrameLayout
+//   └── WebView（MATCH_PARENT 全画面）
+//   └── AdView（WRAP_CONTENT, Gravity.BOTTOM = バナーを最下部にオーバーレイ）
+
+// WebView 設定
+ws.setJavaScriptEnabled(true);
+ws.setDomStorageEnabled(true);      // localStorage 有効
+ws.setMediaPlaybackRequiresUserGesture(false);
+ws.setCacheMode(WebSettings.LOAD_DEFAULT);  // Service Worker キャッシュ活用
+
+// JS ブリッジ登録
+mWebView.addJavascriptInterface(new AdMobBridge(), "AndroidAdMob");
+mWebView.loadUrl("https://shuntube2026-gif.github.io/labyrinth-game/index.html");
+
+// バナー: Adaptive Banner。読み込み完了後に labyrinthSetBannerHeight(dp) を JS へ通知
+// インタースティシャル: loadInterstitial() でプリロード。
+//   showInterstitial() → 表示 → 閉じたら次をプリロード
+```
+
+#### AdMobBridge（内部クラス）仕様
+
+```java
+// window.AndroidAdMob.showInterstitial() → 広告表示、表示できたら true を返す
+// window.AndroidAdMob.preloadInterstitial() → 次の広告を事前読み込み
+```
+
+#### build.gradle の変更
+```groovy
+// 依存関係追加
+implementation 'com.google.android.gms:play-services-ads:23.6.0'
+
+// 署名設定（keystore.properties から読み込み）
+signingConfigs {
+    release {
+        storeFile     rootProject.file(keystoreProperties['storeFile'])
+        storePassword keystoreProperties['storePassword']
+        keyAlias      keystoreProperties['keyAlias']
+        keyPassword   keystoreProperties['keyPassword']
+    }
+}
+buildTypes {
+    release {
+        minifyEnabled true
+        signingConfig signingConfigs.release
+    }
+}
+```
+
+#### AndroidManifest.xml の変更
+```xml
+<!-- 追加 -->
+<uses-permission android:name="android.permission.INTERNET"/>
+
+<!-- application内に追加 -->
+<meta-data
+    android:name="com.google.android.gms.ads.APPLICATION_ID"
+    android:value="ca-app-pub-1169892231871820~3490280336"/>
+
+<!-- LauncherActivity に theme追加（WebView用） -->
+<activity android:name="LauncherActivity"
+    ...
+    android:theme="@android:style/Theme.NoTitleBar">
+```
+
+#### gradle.properties の変更
+```properties
+# Java 17 を明示指定（環境変数より優先）
+org.gradle.java.home=C:/Program Files/Eclipse Adoptium/jdk-17.0.19.10-hotspot
+```
+
+#### keystore.properties（非公開ファイル）
+```properties
+storeFile=./android.keystore
+storePassword=（パスワード）
+keyAlias=android
+keyPassword=（パスワード）
+```
+
+#### キーストア・assetlinks
+- キーストア：`labyrinth-game-android/android.keystore`（alias: android）
+- SHA-256 フィンガープリント：`2A:18:BC:2A:00:03:A4:ED:E4:B7:CB:60:CB:D1:99:4E:75:9B:76:0F:9E:94:BF:58:99:89:09:32:08:B8:38:81`
+- `.well-known/assetlinks.json` に反映済み
+
+#### ビルド成果物
+- **署名済み .aab：** `app/build/outputs/bundle/release/app-release.aab`
+- ビルド時間: 約7秒（依存関係キャッシュ後）
 
 ---
 
@@ -522,57 +642,85 @@ const CACHE = 'labyrinth-v4';
 
 ---
 
-## 13. Google Play Store 公開方針（2026-06-04 追加）
+## 13. Google Play Store 公開方針（2026-06-04 追加 / 2026-06-05 更新）
 
 ### 公開方式
-PWA を **Trusted Web Activity (TWA)** で包み、`.aab` として Google Play に提出する。
+**WebView ベース Android アプリ**として Google Play に提出。
+- ゲーム本体は GitHub Pages の HTTPS URL を WebView で表示
+- AdMob SDK をネイティブに組み込み（バナー＋インタースティシャル）
+- Bubblewrap で生成したプロジェクトをベースにカスタマイズ
 
 ### Android プロジェクト（`labyrinth-game-android/`）
 
 ```
 labyrinth-game-android/
-├── twa-manifest.json     # Bubblewrap 設定（packageId・host・startUrl 等）
-├── store-listing.md      # ストア掲載文（JP/EN・Data safety・Content rating）
-└── BUILD_GUIDE.md        # ビルド手順書（Bubblewrap→Keystore→.aab→Play Console）
+├── app/
+│   ├── build.gradle              # AdMob依存関係・署名設定
+│   └── src/main/
+│       ├── AndroidManifest.xml   # INTERNET権限・AdMob APP_ID
+│       └── java/com/shuntube/labyrinthmarble/
+│           ├── Application.java       # MobileAds.initialize()
+│           ├── LauncherActivity.java  # WebView + AdMob統合（メイン）
+│           └── DelegationService.java
+├── build.gradle                  # Google Maven リポジトリ設定
+├── gradle.properties             # Java17パス・AndroidX設定
+├── keystore.properties           # 署名情報（非公開・gitignore推奨）
+├── local.properties              # Android SDK パス
+├── android.keystore              # 署名キー（非公開）
+├── twa-manifest.json             # Bubblewrap 設定
+├── store-listing.md              # ストア掲載文（JP/EN）
+└── BUILD_GUIDE.md                # ビルド手順書
 ```
 
-### twa-manifest.json 主要設定
+### アプリ設定
 
-```json
-{
-  "packageId": "com.shuntube.labyrinthmarble",
-  "host": "shuntube2026-gif.github.io",
-  "name": "ラビリンスマーブル",
-  "startUrl": "/labyrinth-game/index.html",
-  "display": "standalone",
-  "orientation": "portrait",
-  "themeColor": "#5c2e0e",
-  "backgroundColor": "#d4b06a",
-  "minSdkVersion": 23,
-  "targetSdkVersion": 35
-}
-```
+| 項目 | 値 |
+|---|---|
+| パッケージID | `com.shuntube.labyrinthmarble` |
+| バージョンコード | 2 |
+| バージョン名 | "2" |
+| minSdkVersion | 23 (Android 6.0) |
+| targetSdkVersion | 35 |
+| compileSdkVersion | 36 |
 
-### AdMob 設定（Android 側 作業リスト）
+### AdMob 設定（作業リスト）
 
 | 作業 | 状態 |
 |---|---|
 | HTML 側バナースペース (`#admob-banner-space`) | ✅ 実装済み |
 | HTML 側 JS ブリッジ (`window.AndroidAdMob`) | ✅ 実装済み |
 | インタースティシャルカウンター (`onPlayEnd()`) | ✅ 実装済み |
-| AdMob アプリ・広告ユニット作成 | ⬜ 要手動 |
-| AndroidManifest.xml への APP_ID 追記 | ⬜ Claudeが追記可能 |
-| Activity への JavascriptInterface 実装 | ⬜ 要手動 or 詳細後述 |
+| AdMob アカウント・アプリ登録 | ✅ 完了 |
+| バナー広告ユニット作成 (`banner_main`) | ✅ 完了 |
+| インタースティシャル広告ユニット作成 (`interstitial_main`) | ✅ 完了 |
+| AndroidManifest.xml への APP_ID 追記 | ✅ 実装済み |
+| `play-services-ads` 依存関係追加 | ✅ 実装済み |
+| `Application.java` で MobileAds.initialize() | ✅ 実装済み |
+| `LauncherActivity.java` WebView + AdMobBridge 実装 | ✅ 実装済み |
+| バナー Adaptive Banner（最下部オーバーレイ） | ✅ 実装済み |
+| インタースティシャル プリロード→表示→再プリロード | ✅ 実装済み |
+| Keystore 作成・SHA-256 取得 | ✅ 完了 |
+| `assetlinks.json` に SHA-256 反映 | ✅ 完了 |
+| 署名設定（`keystore.properties` + `build.gradle`） | ✅ 実装済み |
+| **署名済み .aab ビルド成功** | ✅ **完了** |
+| Play Console ストア情報・スクリーンショット登録 | ⬜ 次のステップ |
 
-### 残り作業（手動が必要）
+### 残り作業
 
-1. JDK 17 + Android Studio インストール
-2. `bubblewrap update`（`labyrinth-game-android/` で実行）
-3. Keystore（署名鍵）作成 → SHA-256 を `.well-known/assetlinks.json` に反映
-4. `bubblewrap build` → `.aab` 生成
-5. AdMob でアプリ・広告ユニット作成
-6. AndroidManifest.xml に APP_ID 追記（Claude が対応可）
-7. Play Console でストア情報・スクリーンショット・Data safety 登録
+1. **Play Console でアプリ作成・.aab アップロード**（内部テストから開始推奨）
+2. ストア掲載情報入力（`store-listing.md` を参照）
+3. スクリーンショット・フィーチャーグラフィック用意（スマホで実機スクショ推奨）
+4. Data safety アンケート回答（個人データ収集なし・AdMob あり）
+5. コンテンツレーティング回答（全年齢対象）
+6. 審査提出
+
+### ビルドコマンド（次回以降）
+
+```powershell
+# labyrinth-game-android フォルダで実行
+.\gradlew.bat bundleRelease
+# 出力: app\build\outputs\bundle\release\app-release.aab
+```
 
 ---
 
@@ -590,8 +738,8 @@ labyrinth-game-android/
 - [x] ~~タイトル/スタート画面~~ → 木製テーマフルリデザイン済み
 - [x] ~~ステージロックシステム~~ → localStorage永続化で実装済み
 - [x] ~~PWAアイコン差し替え~~ → 実際の木製ボード写真アイコン実装済み
-- [x] ~~Google Play 対応~~ → TWA 方針・AdMob統合・privacy-policy.html 実装済み
+- [x] ~~Google Play 対応~~ → WebView+AdMob統合・署名済み.aab生成済み・Play Console 提出待ち
 
 ---
 
-*最終更新: 2026-06-04 / 担当AI: Claude (Claude Code) / 対応バージョン: Stage 40まで（全ステージ動作確認済み・PWA v4・Google Play 対応済み・ラビリンスマーブルにタイトル変更済み）*
+*最終更新: 2026-06-05 / 担当AI: Claude (Claude Code) / 対応バージョン: Stage 40まで（全ステージ動作確認済み・PWA v4・AdMob Android統合済み・署名済み.aab完成・Play Console提出待ち）*
